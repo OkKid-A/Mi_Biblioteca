@@ -2,7 +2,7 @@ package com.cunoc.mi_biblioteca.Usuarios;
 
 public class Cliente extends Usuario{
 
-    private int saldo;
+    private float saldo;
     private boolean suspendido;
     private boolean subscrito;
     public Cliente(String username, String nombre, Tipo tipo, String correo, int id) {
@@ -18,11 +18,11 @@ public class Cliente extends Usuario{
         this.suspendido = suspendido;
     }
 
-    public int getSaldo() {
+    public float getSaldo() {
         return saldo;
     }
 
-    public void setSaldo(int saldo) {
+    public void setSaldo(float saldo) {
         this.saldo = saldo;
     }
 
@@ -32,6 +32,16 @@ public class Cliente extends Usuario{
 
     public void setSuspendido(boolean suspendido) {
         this.suspendido = suspendido;
+    }
+
+    public String getSuspendido() {
+        String susp;
+        if (this.suspendido){
+            susp = "Activo";
+        } else {
+            susp = "Suspendido";
+        }
+        return susp;
     }
 
     public boolean isSubscrito() {

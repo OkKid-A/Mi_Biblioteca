@@ -4,8 +4,6 @@ import com.cunoc.mi_biblioteca.DB.Conector;
 import com.cunoc.mi_biblioteca.Usuarios.Cliente;
 import com.cunoc.mi_biblioteca.Usuarios.Tipo;
 import com.cunoc.mi_biblioteca.Usuarios.Usuario;
-import com.sun.jdi.connect.Connector;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -40,7 +38,7 @@ public class ElectorServlet extends HttpServlet {
                         Tipo.clasificararAcceso(Integer.parseInt(usuario.getString("tipo"))),
                         usuario.getString("email"),usuario.getInt("id"));
 
-                request.getSession(true).setAttribute("current-user", user);
+                request.getSession(true).setAttribute("currentUser", user);
             }
             conector.closeThis();
         } catch (SQLException e) {
@@ -60,7 +58,7 @@ public class ElectorServlet extends HttpServlet {
                     if (clienteSet.next()){
                         Cliente cliente = new Cliente(user.getUsername(),user.getNombre(),user.getTipo(),user.getCorreo(),user.getId(),
                                 clienteSet.getInt("saldo"),clienteSet.getBoolean("subscrito"),clienteSet.getBoolean("suspendido"));
-
+                        System.out.println(cliente.isSubscrito());
                         request.getSession(true).setAttribute("cliente", cliente);
                     }
                     response.sendRedirect("/usuario/inicio-servlet");

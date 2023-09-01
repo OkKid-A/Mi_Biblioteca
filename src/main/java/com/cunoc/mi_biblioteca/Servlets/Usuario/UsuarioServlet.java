@@ -1,5 +1,9 @@
 package com.cunoc.mi_biblioteca.Servlets.Usuario;
 
+import com.cunoc.mi_biblioteca.DB.Conector;
+import com.cunoc.mi_biblioteca.Usuarios.Cliente;
+import com.cunoc.mi_biblioteca.Usuarios.Perfil;
+import com.cunoc.mi_biblioteca.Usuarios.Usuario;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -13,7 +17,34 @@ public class UsuarioServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        Usuario usuario = (Usuario) req.getSession().getAttribute("currentUser");
+        Cliente cliente = (Cliente) req.getSession().getAttribute("cliente");
+        req.setAttribute("usuario",usuario);
+        req.getRequestDispatcher("/areas/cliente/cliente.jsp").forward(req,resp);
+    }
 
-        resp.sendRedirect("../areas/cliente/cliente.jsp");
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String tipoEdit = req.getParameter("accion");
+        Usuario usuario = (Usuario) req.getSession().getAttribute("currentUser");
+        Conector conector = (Conector) req.getSession().getAttribute("conector");
+        String valorNuevo = req.getParameter("nuevoDato");
+        Perfil perfil = new Perfil(conector);
+        if (tipoEdit != null) {
+            if (tipoEdit.equals("nombre")) {
+                perfil.editarNombre(String.valueOf(usuario.getId()), valorNuevo);
+                usuario.setNombre(valorNuevo);
+            } else if (tipoEdit.equals("username")) {
+                perfil.editarUsername(String.valueOf(usuario.getId()), valorNuevo);
+                usuario.setUsername(valorNuevo);
+            } else if (tipoEdit.equals("correo")) {
+                perfil.editarEmail(String.valueOf(usuario.getId()), valorNuevo);
+                usuario.setCorreo(valorNuevo);
+            } else if (tipoEdit.equals("password")) {
+                perfil.editarPasword(String.valueOf(usuario.getId()), valorNuevo);
+            }
+        }
+        req.getSession().setAttribute("currentUser",usuario);
+        resp.sendRedirect("/usuario/inicio-servlet");
     }
 }

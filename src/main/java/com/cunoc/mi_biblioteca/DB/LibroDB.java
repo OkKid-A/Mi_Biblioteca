@@ -21,14 +21,16 @@ public class LibroDB {
         Libro encontrado = null;
         try  {
             ResultSet genero = null;
-            ResultSet resLibro = conector.selectFrom(String.format("SELECT * FROM libro WHERE isbn = %s",isbn));
-            if (resLibro.next()) {
-                genero = conector.selectFrom(String.format("SELECT nombre FROM genero WHERE id = %s",
-                        conector.encomillar(String.valueOf(resLibro.getInt("genero_id")))));
+            if (isbn!=null && !isbn.isEmpty()) {
+                ResultSet resLibro = conector.selectFrom(String.format("SELECT * FROM libro WHERE isbn = %s", isbn));
+                if (resLibro.next()) {
+                    genero = conector.selectFrom(String.format("SELECT nombre FROM genero WHERE id = %s",
+                            conector.encomillar(String.valueOf(resLibro.getInt("genero_id")))));
+                }
+                genero.next();
+                encontrado = new Libro(resLibro.getString("autor"), resLibro.getString("nombre"),
+                        resLibro.getInt("isbn"), genero.getString("nombre"), resLibro.getDouble("precio"));
             }
-            genero.next();
-            encontrado = new Libro(resLibro.getString("autor"),resLibro.getString("nombre"),
-                    resLibro.getInt("isbn"),genero.getString("nombre"),resLibro.getDouble("precio"));
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

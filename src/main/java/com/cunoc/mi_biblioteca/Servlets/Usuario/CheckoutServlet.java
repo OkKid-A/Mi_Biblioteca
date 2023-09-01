@@ -1,11 +1,14 @@
 package com.cunoc.mi_biblioteca.Servlets.Usuario;
 
 import com.cunoc.mi_biblioteca.Biblioteca.Libro;
+import com.cunoc.mi_biblioteca.Biblioteca.Recepcion;
 import com.cunoc.mi_biblioteca.DB.Conector;
 import com.cunoc.mi_biblioteca.DB.LibroDB;
 import com.cunoc.mi_biblioteca.Envios.Bodega;
+import com.cunoc.mi_biblioteca.Envios.TipoEncargo;
 import com.cunoc.mi_biblioteca.Usuarios.Cliente;
 import com.cunoc.mi_biblioteca.Usuarios.Subscripcion;
+import com.cunoc.mi_biblioteca.Usuarios.Usuario;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -31,6 +34,8 @@ public class CheckoutServlet extends HttpServlet {
             Subscripcion subscripcion = new Subscripcion(50);
             req.setAttribute("subscripcion",subscripcion);
         }
+        String orden = (new Recepcion(conector)).getNumeroOrden();
+        req.setAttribute("orden",orden);
         req.getRequestDispatcher("/areas/cliente/checkout.jsp").forward(req,resp);
     }
 
@@ -40,10 +45,18 @@ public class CheckoutServlet extends HttpServlet {
         String tipo = req.getParameter("tipoEnvio");
         String isbn = req.getParameter("isbn");
         String biblioOrigen = req.getParameter("biblioteca");
+        System.out.println(dias);
+        String userID = String.valueOf(((Usuario)req.getSession().getAttribute("currentUser")).getId());
         Conector conector = (Conector) req.getSession().getAttribute("conector");
         Bodega bodega = new Bodega(conector);
+        Recepcion recepcion = new Recepcion(conector);
         if (tipo.equals("domicilio")){
-            bodega.insertarEntrega(isbn,biblioOrigen);
+            recepcion.insertarPrestamoDomicilio(userID,isbn,biblioOrigen,dias,TipoEncargo.ENTREGA);
+        } else if (tipo.equals("recepcion")){
+            recepcion.insertarSolicitudPrestamo(userID,isbn,biblioOrigen,dias);
         }
+
+        req.setAttribute("orden",recepcion.getNumeroOrden());
+        resp.sendRedirect("/areas/cliente/cliente.jsp");
     }
 }

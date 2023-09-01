@@ -1,3 +1,4 @@
+<%--@elvariable id="orden" type="java.lang.String"--%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%--
   Created by IntelliJ IDEA.
@@ -11,20 +12,21 @@
 <head>
     <title>Checkout</title>
     <jsp:include page="/includes/resources.jsp"/>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+
 </head>
 <body>
 <div class="pt-5" >
     <div class="container blue" >
-        <h1 class="text-center" style="color: #ffffff"> Mi Biblioteca </h1>
         <div class="row">
             <div class="col-md-7 mx-auto">
                 <div class="card-body d-flex " style="background-color: #ffffff">
                     <form id="submitForm" action="${pageContext.request.contextPath}/usuario/checkout-servlet?isbn=${libro.isbn}&biblioteca=<%out.print(request.getParameter("biblioteca"));%>" method="POST" data-parsley-validate=""
                           data-parsley-errors-messages-disabled="true">
-                        <div class="form-group required">
+                        <div class="form-group required id-11">
                             <label class="text card" for="dias" >Selecciona cuantos dias tendras el libro</label>
-                            <select class="form-control col-2" id="dias" required>
-                                <option value="1">1</option>
+                            <select class="form-control col-2" id="dias" name="dias" required>
+                                <option value="1" selected>1</option>
                                 <option value="2">2</option>
                                 <option value="3">3</option>
                                 <option value="4">4</option>
@@ -38,13 +40,13 @@
                             <label class="text card" for="seleccionEntrega"> Selecciona el metodo de entrega</label>
                             <div class="form-check required " id="seleccionEntrega">
                                 <div >
-                                <input class="form-check-input" type="radio" name="tipoEnvio" id="domicilio" value="domicilio">
+                                <input class="form-check-input" type="radio" name="tipoEnvio" id="domicilio" value="domicilio" checked>
                                 <label class="form-check-label" for="domicilio">
                                     Entrega a Domicilio.
                                 </label>
                                 </div>
                                 <div>
-                                <input class="form-check-input" type="radio" name="tipoEnvio" id="recepcion" value="recepcion" checked>
+                                <input class="form-check-input" type="radio" name="tipoEnvio" id="recepcion" value="recepcion" >
                                 <label class="form-check-label" for="recepcion">
                                    Recoger en Biblioteca.
                                 </label>
@@ -59,10 +61,11 @@
                                     <div class="card " style="width: 18rem;">
                                         <div>
                                             <ul class="list-group list-group-flush">
-                                                <li class="list-group-item">Libro: ${libro.precio}</li>
-                                                <li class="list-group-item" id="envioPrecio">Envio: ${subscripcion.envio}</li>
-                                                <li class="list-group-item shadow">Total:
-                                                <c:out value="${libro.precio + subscripcion.envio}"/></li>
+                                                <li class="list-group-item">Libro: $${libro.precio}</li>
+                                                <li class="list-group-item" id="envioPrecio">Envio: $${subscripcion.envio}</li>
+                                                <li class="list-group-item shadow" id="total">Total:
+                                               $<c:out value="${libro.precio + subscripcion.envio}"/></li>
+
                                             </ul>
                                         </div>
                                     </div>
@@ -75,14 +78,14 @@
                                     <p class="card-text" id="textoTipoPrestamo"></p>
                                 </div>
                                 <ul class="list-group list-group-flush">
-                                    <li class="list-group-item">Libro: ${libro.nombre}</li>
+                                    <li class="list-group-item">Libro: $${libro.nombre}</li>
                                     <li class="list-group-item" id="diasNumero">Dias: 1</li>
-                                    <li class="list-group-item">Precio: $${libro.precio}</li>
+                                    <li class="list-group-item" id="ordenTotal">Precio: $${libro.precio}</li>
                                     <li class="list-group-item">Biblioteca: <%out.print(request.getParameter("biblioteca"));%></li>
                                 </ul>
                                 <div class="card-body text-center">
                                     <span class="align-middle">
-                                    <button  class="btn btn-primary btn-dark" type="submit">Completar orden</button>
+                                    <button  class="btn btn-primary btn-dark" id="completo" data-toggle="modal" data-target="#exampleModal">Completar orden</button>
                                     </span>
                                 </div>
                             </div>
@@ -98,25 +101,28 @@
 </div>
     <script>
         $(document).ready(function () {
-
-            var seleccionado = $("input[name = tipoEnvio]:checked").val();
-            if (seleccionado == "domicilio"){
-                $("#completar").hide();
-                $("#resumen").show();
-            } else {
-                $("#completar").show();
-                $("#envioPrecio").hide();
-            }
             $("input[name = tipoEnvio]").on("click", function (){
                 var seleccionado = $("input[name = tipoEnvio]:checked").val();
                 if (seleccionado == "domicilio"){
                     $("#completar").hide();
                     $("#envioPrecio").show();
+                    $("#total").text("Total: $" + <c:out value="${libro.precio + subscripcion.envio}"/>)
+                    $("#ordenTotal").text("Total: $" + <c:out value="${libro.precio + subscripcion.envio}"/>)
                 } else {
                     $("#completar").show();
                     $("#envioPrecio").hide();
+                    $("#total").text("Total: $" + <c:out value="${libro.precio}"/>)
+                    $("#ordenTotal").text("Total: $" + <c:out value="${libro.precio}"/>)
                 }
             });
+            $("#completo").on("click",function (){
+                $("#myModal").modal('show');
+            })
+            $(window).on("load",function (){
+                ("div.id-11 select").val("1").change();
+                $("input[name = tipoEnvio]:checked").select();
+
+            })
             $("#dias").on("change", function (){
                 var selected = document.getElementById("dias")
                 var diasNum = document.getElementById("diasNumero");

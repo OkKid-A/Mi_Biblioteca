@@ -35,6 +35,7 @@ public class Conector {
             Statement statement = conneccion.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
             resultados = statement.executeQuery(query);
             return resultados;
+
         } catch (SQLException throwables) {
             throwables.printStackTrace();
             return null;
@@ -52,7 +53,10 @@ public class Conector {
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
+        closeThis();
     }
+
+
 
     public void closeThis() {
         try {
