@@ -40,7 +40,7 @@ public class LibroDB {
     public List<Existencia> reportarExistencias(String isbn){
         List<Existencia> existencias = null;
         try {
-            ResultSet resultados = conector.selectFrom(String.format("SELECT b.*, e.cantidad, e.isbn FROM biblioteca b" +
+            ResultSet resultados = conector.selectFrom(String.format("SELECT b.*, e.disponibles, e.isbn FROM biblioteca b" +
                     " INNER JOIN existencia e ON b.id_biblioteca=e.id_biblioteca WHERE isbn = %s;",isbn));
             if (resultados.next()){
                 existencias = listarExistencias(resultados,isbn);
@@ -58,7 +58,7 @@ public class LibroDB {
         do{
             try  {
                 existencias.add(new Existencia(resultSet.getInt("id_biblioteca"),resultSet.getString("nombre"),
-                        resultSet.getString("direccion"),resultSet.getInt("cantidad"),Integer.parseInt(isbn)));
+                        resultSet.getString("direccion"),resultSet.getInt("disponibles"),Integer.parseInt(isbn)));
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }

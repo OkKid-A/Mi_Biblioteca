@@ -1,8 +1,11 @@
-package com.cunoc.mi_biblioteca.Usuarios;
+package com.cunoc.mi_biblioteca.Usuarios.Cliente;
 
-public class Cliente extends Usuario{
+import com.cunoc.mi_biblioteca.Usuarios.Tipo;
+import com.cunoc.mi_biblioteca.Usuarios.Usuario;
 
-    private float saldo;
+public class Cliente extends Usuario {
+
+    private double saldo;
     private boolean suspendido;
     private boolean subscrito;
     public Cliente(String username, String nombre, Tipo tipo, String correo, int id) {
@@ -18,11 +21,11 @@ public class Cliente extends Usuario{
         this.suspendido = suspendido;
     }
 
-    public float getSaldo() {
+    public double getSaldo() {
         return saldo;
     }
 
-    public void setSaldo(float saldo) {
+    public void setSaldo(double saldo) {
         this.saldo = saldo;
     }
 

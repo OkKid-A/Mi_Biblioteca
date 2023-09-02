@@ -1,7 +1,7 @@
 package com.cunoc.mi_biblioteca.Servlets.Login;
 
 import com.cunoc.mi_biblioteca.DB.Conector;
-import com.cunoc.mi_biblioteca.Usuarios.Cliente;
+import com.cunoc.mi_biblioteca.Usuarios.Cliente.Cliente;
 import com.cunoc.mi_biblioteca.Usuarios.Tipo;
 import com.cunoc.mi_biblioteca.Usuarios.Usuario;
 import jakarta.servlet.annotation.WebServlet;
@@ -59,7 +59,7 @@ public class ElectorServlet extends HttpServlet {
                         Cliente cliente = new Cliente(user.getUsername(),user.getNombre(),user.getTipo(),user.getCorreo(),user.getId(),
                                 clienteSet.getInt("saldo"),clienteSet.getBoolean("subscrito"),clienteSet.getBoolean("suspendido"));
                         System.out.println(cliente.isSubscrito());
-                        request.getSession(true).setAttribute("cliente", cliente);
+                        request.getSession().setAttribute("cliente", cliente);
                     }
                     response.sendRedirect("/usuario/inicio-servlet");
                     break;
@@ -86,8 +86,8 @@ public class ElectorServlet extends HttpServlet {
         HttpSession session = request.getSession();
         session.setMaxInactiveInterval(3600);
         session.setAttribute("conector",conector);
-        request.getSession(true).removeAttribute("actual-user");
-        request.getSession(true).removeAttribute("access");
+        request.getSession().removeAttribute("currentUser");
+        request.getSession().removeAttribute("cliente");
         try {
             response.sendRedirect("../index.jsp");
         } catch (IOException e) {

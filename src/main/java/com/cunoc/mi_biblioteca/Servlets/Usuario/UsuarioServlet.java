@@ -1,8 +1,9 @@
 package com.cunoc.mi_biblioteca.Servlets.Usuario;
 
 import com.cunoc.mi_biblioteca.DB.Conector;
-import com.cunoc.mi_biblioteca.Usuarios.Cliente;
-import com.cunoc.mi_biblioteca.Usuarios.Perfil;
+import com.cunoc.mi_biblioteca.Usuarios.Cliente.Cliente;
+import com.cunoc.mi_biblioteca.Usuarios.Cliente.Perfil;
+import com.cunoc.mi_biblioteca.Usuarios.Cliente.Transaccion;
 import com.cunoc.mi_biblioteca.Usuarios.Usuario;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -11,6 +12,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
+import java.util.List;
 
 @WebServlet (name = "UsuarioInicio", urlPatterns = "/usuario/inicio-servlet")
 public class UsuarioServlet extends HttpServlet {
@@ -19,6 +21,10 @@ public class UsuarioServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         Usuario usuario = (Usuario) req.getSession().getAttribute("currentUser");
         Cliente cliente = (Cliente) req.getSession().getAttribute("cliente");
+        Conector conector = (Conector) req.getSession().getAttribute("conector");
+        Perfil perfil = new Perfil(conector);
+        List<Transaccion> transacciones = perfil.obtenerTransacciones(String.valueOf(cliente.getId()));
+        req.setAttribute("transacciones",transacciones);
         req.setAttribute("usuario",usuario);
         req.getRequestDispatcher("/areas/cliente/cliente.jsp").forward(req,resp);
     }

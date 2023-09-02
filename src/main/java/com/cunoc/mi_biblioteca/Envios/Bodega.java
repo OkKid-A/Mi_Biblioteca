@@ -1,7 +1,7 @@
 package com.cunoc.mi_biblioteca.Envios;
 
 import com.cunoc.mi_biblioteca.DB.Conector;
-import com.cunoc.mi_biblioteca.Usuarios.Tipo;
+
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -53,7 +53,7 @@ public class Bodega {
         ResultSet resultSet = conector.selectFrom(queryTransportista);
         int transportistaID = 0;
             if (resultSet.next()){
-                transportistaID = resultSet.getInt("COUNT(numero_encargo)");
+                transportistaID = resultSet.getInt("transportista_id");
                 System.out.println(transportistaID);
                 return String.valueOf(transportistaID);
             }

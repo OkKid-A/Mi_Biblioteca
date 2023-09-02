@@ -4,9 +4,6 @@ import com.cunoc.mi_biblioteca.Biblioteca.Existencia;
 import com.cunoc.mi_biblioteca.DB.LibroDB;
 import com.cunoc.mi_biblioteca.Biblioteca.Libro;
 import com.cunoc.mi_biblioteca.DB.Conector;
-import com.cunoc.mi_biblioteca.Usuarios.Cliente;
-import com.cunoc.mi_biblioteca.Usuarios.Subscripcion;
-import com.cunoc.mi_biblioteca.Usuarios.Usuario;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -14,7 +11,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
-import java.sql.ResultSet;
 import java.util.List;
 
 @WebServlet(name = "Libro",urlPatterns = "/usuario/libro-servlet")

@@ -1,12 +1,12 @@
 package com.cunoc.mi_biblioteca.Servlets.Usuario;
 
 import com.cunoc.mi_biblioteca.Biblioteca.Libro;
-import com.cunoc.mi_biblioteca.Biblioteca.Recepcion;
+import com.cunoc.mi_biblioteca.Recepcionista.Recepcion;
 import com.cunoc.mi_biblioteca.DB.Conector;
 import com.cunoc.mi_biblioteca.DB.LibroDB;
 import com.cunoc.mi_biblioteca.Envios.Bodega;
 import com.cunoc.mi_biblioteca.Envios.TipoEncargo;
-import com.cunoc.mi_biblioteca.Usuarios.Cliente;
+import com.cunoc.mi_biblioteca.Usuarios.Cliente.Cliente;
 import com.cunoc.mi_biblioteca.Usuarios.Subscripcion;
 import com.cunoc.mi_biblioteca.Usuarios.Usuario;
 import jakarta.servlet.ServletException;

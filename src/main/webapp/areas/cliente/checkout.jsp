@@ -78,7 +78,7 @@
                                     <p class="card-text" id="textoTipoPrestamo"></p>
                                 </div>
                                 <ul class="list-group list-group-flush">
-                                    <li class="list-group-item">Libro: $${libro.nombre}</li>
+                                    <li class="list-group-item">Libro: ${libro.nombre}</li>
                                     <li class="list-group-item" id="diasNumero">Dias: 1</li>
                                     <li class="list-group-item" id="ordenTotal">Precio: $${libro.precio}</li>
                                     <li class="list-group-item">Biblioteca: <%out.print(request.getParameter("biblioteca"));%></li>

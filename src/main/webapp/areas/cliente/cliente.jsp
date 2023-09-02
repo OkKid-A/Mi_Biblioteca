@@ -1,11 +1,9 @@
-<jsp:useBean id="currentUser" scope="session" type="com.cunoc.mi_biblioteca.Usuarios.Usuario"/>
-<jsp:useBean id="cliente" scope="session" type="com.cunoc.mi_biblioteca.Usuarios.Cliente"/>
 
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <html>
 <head>
-    <title>Title</title>
+    <title>Perfil</title>
     <jsp:include page="/includes/resources.jsp"/>
     <jsp:include page="/includes/header-cliente.jsp"/>
     <jsp:include page="modal-resources.jsp"/>
@@ -41,7 +39,7 @@
                     <p class="text-muted mb-4">Saldo actual: $${cliente.saldo}</p>
                     <div class="d-flex justify-content-center mb-2">
                         <button type="button" class="btn btn-primary mr-5" data-toggle="modal" data-target="#modalSaldo">Recargar</button>
-                        <button type="button" class="btn btn-primary" >Historial</button>
+                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modalHistory">Historial</button>
                     </div>
                 </div>
             </div>
@@ -115,7 +113,7 @@
                     </div>
                     <div class="col-sm-3">
                         <c:if test="${cliente.suspendido}">
-                            <p class="btn btn-dark mb-0" id="estado" data-toggle="modal" data-target="#modalCambio" >
+                            <p class="btn btn-dark mb-0" type="button" href="${pageContext.request.contextPath}/usuario/suspension-servlet" >
                                 Disputar</p>
                         </c:if>
                     </div>
@@ -170,6 +168,21 @@
             </div>
         </form>
     </div>
+    <div class="modal fade" role="dialog" id="modalHistory">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Transacciones</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                      <jsp:include page="transaccion-tabla.jsp"/>
+                    </div>
+                </div>
+            </div>
+    </div>
     <div class="modal fade" role="dialog" id="modalSaldo">
         <form id="form-saldo" action="${pageContext.request.contextPath}/usuario/suscribe-servlet" method="POST">
             <div class="modal-dialog" role="document">
@@ -183,7 +196,7 @@
                     <div class="modal-body">
                         <p>Saldo Actual: $${cliente.saldo}</p>
                         <label for="nuevoSaldo">Ingresa la cantidad que deseas sumar</label>
-                        <input class="form-control" name="nuevoSaldo" id ="nuevoSaldo" type="text" inputmode="decimal" pattern="[0-9]*[.]?[0-9]">
+                        <input class="form-control" name="nuevoSaldo" id ="nuevoSaldo" type="text" inputmode="decimal" pattern="[0-9]+([\.,][0-9]+)?">
                     </div>
                     <div class="modal-footer">
                         <button type="submit" class="btn btn-primary" form="form-saldo">Aceptar</button>
