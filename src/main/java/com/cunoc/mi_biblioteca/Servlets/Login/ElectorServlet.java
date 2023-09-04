@@ -1,6 +1,7 @@
 package com.cunoc.mi_biblioteca.Servlets.Login;
 
 import com.cunoc.mi_biblioteca.DB.Conector;
+import com.cunoc.mi_biblioteca.Recepcionista.Recepcionista;
 import com.cunoc.mi_biblioteca.Usuarios.Cliente.Cliente;
 import com.cunoc.mi_biblioteca.Usuarios.Tipo;
 import com.cunoc.mi_biblioteca.Usuarios.Usuario;
@@ -45,14 +46,21 @@ public class ElectorServlet extends HttpServlet {
             e.printStackTrace();
         }
         try {
+            int id = user.getId();
             switch (user.getTipo()) {
                 case TRANSPORTISTA:
                     break;
                 case RECEPCIONISTA:
-                    response.sendRedirect("fabrica-servlet");
+                    query = String.format("SELECT * FROM recepcionista WHERE id_recepcionista = %s",id);
+                    ResultSet recepcSet = conector.selectFrom(query);
+                    if (recepcSet.next()){
+                        Recepcionista recepcionista = new Recepcionista(user.getUsername(),user.getNombre(),user.getTipo(),user.getCorreo(),user.getId(),
+                               recepcSet.getInt("puesto_biblioteca"));
+                        request.getSession().setAttribute("recepcionista",recepcionista);
+                    }
+                    response.sendRedirect("/recepcion/inicio-servlet");
                     break;
                 case CLIENTE:
-                    int id = user.getId();
                     query = String.format("SELECT * FROM cliente WHERE id_cliente = %s",id);
                     ResultSet clienteSet = conector.selectFrom(query);
                     if (clienteSet.next()){

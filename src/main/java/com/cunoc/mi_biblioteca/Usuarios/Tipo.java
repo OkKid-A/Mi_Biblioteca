@@ -30,4 +30,8 @@ public enum Tipo {
                 return null;
         }
     }
+
+    public int getNivel() {
+        return nivel;
+    }
 }

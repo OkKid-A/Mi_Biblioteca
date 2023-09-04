@@ -196,7 +196,7 @@
                     <div class="modal-body">
                         <p>Saldo Actual: $${cliente.saldo}</p>
                         <label for="nuevoSaldo">Ingresa la cantidad que deseas sumar</label>
-                        <input class="form-control" name="nuevoSaldo" id ="nuevoSaldo" type="text" inputmode="decimal" pattern="[0-9]+([\.,][0-9]+)?">
+                        <input class="form-control" name="nuevoSaldo" id ="nuevoSaldo" type="text" inputmode="decimal" pattern="[0-9]+([\.,][0-9][0-9])?">
                     </div>
                     <div class="modal-footer">
                         <button type="submit" class="btn btn-primary" form="form-saldo">Aceptar</button>

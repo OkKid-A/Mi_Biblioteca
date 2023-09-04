@@ -56,6 +56,16 @@ public class Conector {
         closeThis();
     }
 
+    public void updateWithException(String query, String[] valores) throws SQLException {
+            Connection conneccion = realizarConneccion();
+            PreparedStatement preparedStatement = conneccion.prepareStatement(query);
+            for (int k = 0; k < valores.length; k++) {
+                preparedStatement.setString(k + 1, valores[k]);
+            }
+            preparedStatement.executeUpdate();
+        closeThis();
+    }
+
 
 
     public void closeThis() {

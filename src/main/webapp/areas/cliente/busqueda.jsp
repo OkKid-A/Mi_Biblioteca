@@ -12,7 +12,7 @@
 <html>
 
 <head>
-    <title>Title</title>
+    <title>Buscar</title>
   <jsp:include page="/includes/resources.jsp"/>
   <jsp:include page="/includes/header-cliente.jsp"/>
 </head>
