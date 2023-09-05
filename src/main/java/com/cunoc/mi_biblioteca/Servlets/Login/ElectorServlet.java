@@ -49,6 +49,8 @@ public class ElectorServlet extends HttpServlet {
             int id = user.getId();
             switch (user.getTipo()) {
                 case TRANSPORTISTA:
+                    request.getSession().setAttribute("transportista",user);
+                    response.sendRedirect("/transporte/inicio-servlet");
                     break;
                 case RECEPCIONISTA:
                     query = String.format("SELECT * FROM recepcionista WHERE id_recepcionista = %s",id);

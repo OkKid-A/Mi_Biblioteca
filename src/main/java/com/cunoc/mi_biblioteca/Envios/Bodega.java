@@ -1,10 +1,13 @@
 package com.cunoc.mi_biblioteca.Envios;
 
 import com.cunoc.mi_biblioteca.DB.Conector;
+import org.eclipse.tags.shaded.org.apache.regexp.RE;
 
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Bodega {
 
@@ -14,14 +17,43 @@ public class Bodega {
         this.conector = conector;
     }
 
+    public List<Entrega> buscarEntregasPorID(String transID) throws SQLException {
+        String query = String.format("SELECT l.nombre,u.nombre,e.*,d.*,b.nombre " +
+                "    FROM encargo e" +
+                "        INNER JOIN biblioteca b on e.biblio_origen = b.id_biblioteca" +
+                "        INNER JOIN entrega d on e.numero_encargo = d.numero_encargo" +
+                "        INNER JOIN libro l on d.isbn = l.isbn" +
+                "        INNER JOIN usuario u on d.cliente_id = u.id " +
+                "WHERE transportista_id = %s",transID);
+        ResultSet resultSet = conector.selectFrom(query);
+        List<Entrega> entregas = new ArrayList<>();
+        if (resultSet.next()){
+            do {
+                Entrega entrega = new Entrega(resultSet.getInt("d.numero_encargo"),
+                        resultSet.getInt("id_prestamo"),
+                        resultSet.getInt("isbn"),
+                        resultSet.getInt("cliente_id"),
+                        resultSet.getString("u.nombre"),
+                        EstadoEntrega.clasificar(resultSet.getString("estado")),
+                        resultSet.getString("b.nombre"),
+                        resultSet.getString("l.nombre")
+                );
+                entregas.add(entrega);
+            }while (resultSet.next());
+        }
+        return entregas;
+    }
+
     public String insertarEncargo(String isbn, String biblio_origen, TipoEncargo tipoEncargo){
 
-        String insertQuery = "INSERT INTO encargo (estado, transportista_id,fecha,biblio_origen,tipo_encargo)" + "VALUES (?,?,curdate(),?,?)";
+        String insertQuery = "INSERT INTO encargo (estado, transportista_id,fecha,biblio_origen,tipo_encargo)" +
+                "VALUES (?,?,curdate(),?,?)";
         String transportistaID = null;
         try {
                 transportistaID = asignarTransportista();
                 System.out.println(transportistaID);
-            conector.update(insertQuery, new String[]{"pendiente", String.valueOf(transportistaID), biblio_origen, String.valueOf(tipoEncargo)});
+            conector.update(insertQuery, new String[]{String.valueOf(EstadoEntrega.PENDIENTE), String.valueOf(transportistaID),
+                    biblio_origen, String.valueOf(tipoEncargo)});
             return transportistaID;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -29,6 +61,11 @@ public class Bodega {
         }
     }
 
+
+    public void cambiarEstadoEntrega(String id_encargo,EstadoEntrega estadoEntrega) throws SQLException {
+        String updateQuery = "UPDATE encargo SET estado = ? WHERE numero_encargo = ?";
+        conector.updateWithException(updateQuery,new String[]{String.valueOf(estadoEntrega),id_encargo});
+    }
 
     public void insertarEntrega(String isbn, String cliente_id){
         String queryEntrega = "INSERT INTO entrega (id_prestamo, numero_encargo, isbn, cliente_id) Values(?,?,?,?)";
@@ -48,8 +85,13 @@ public class Bodega {
     }
 
     public String asignarTransportista() throws SQLException{
-        String queryTransportista = String.format("SELECT COUNT(numero_encargo), transportista_id FROM encargo WHERE estado = 'pendiente' " +
-                "GROUP BY transportista_id ORDER BY COUNT(numero_encargo)");
+        String queryTransportista = String.format("SELECT transportista_id, IFNULL(encargo_count,0) as valor " +
+                "FROM transportista " +
+                "LEFT JOIN " +
+                "        (SELECT transportista_id, count(numero_encargo) as encargo_count" +
+                "         FROM encargo WHERE estado = %s " +
+                "         GROUP BY transportista_id) prop " +
+                "USING (transportista_id) ORDER BY valor",conector.encomillar(String.valueOf(EstadoEntrega.PENDIENTE)));
         ResultSet resultSet = conector.selectFrom(queryTransportista);
         int transportistaID = 0;
             if (resultSet.next()){

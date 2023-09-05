@@ -29,9 +29,9 @@ body{
               <input type="password" class="form-control" required id="password" name="password" style=
                       "color: black" placeholder="Contraseña">
             </div>
-            <div class="form-group pt-0">
+            <div class="form-group pt-0 justify-content-center">
               <button class="btn btn-primary btn-block" type="submit"> Iniciar Sesion</button>
-              <a href="areas/upload.jsp" class="text-center">Subir Archivo de Records</a>
+              <a href="${pageContext.request.contextPath}/upload.jsp" class="text-center">Subir Archivo de Records</a>
             </div>
           </form>
         </div>

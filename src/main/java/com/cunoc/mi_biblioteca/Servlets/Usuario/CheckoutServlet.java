@@ -7,6 +7,7 @@ import com.cunoc.mi_biblioteca.DB.LibroDB;
 import com.cunoc.mi_biblioteca.Envios.Bodega;
 import com.cunoc.mi_biblioteca.Envios.TipoEncargo;
 import com.cunoc.mi_biblioteca.Usuarios.Cliente.Cliente;
+import com.cunoc.mi_biblioteca.Usuarios.Cliente.Perfil;
 import com.cunoc.mi_biblioteca.Usuarios.Subscripcion;
 import com.cunoc.mi_biblioteca.Usuarios.Usuario;
 import jakarta.servlet.ServletException;
@@ -50,10 +51,14 @@ public class CheckoutServlet extends HttpServlet {
         Conector conector = (Conector) req.getSession().getAttribute("conector");
         Bodega bodega = new Bodega(conector);
         Recepcion recepcion = new Recepcion(conector);
-        if (tipo.equals("domicilio")){
-            recepcion.insertarPrestamoDomicilio(userID,isbn,biblioOrigen,dias,TipoEncargo.ENTREGA);
-        } else if (tipo.equals("recepcion")){
-            recepcion.insertarSolicitudPrestamo(userID,isbn,biblioOrigen,dias);
+        Perfil perfil = new Perfil(conector);
+        if (perfil.clasificarValidez(recepcion.getBibliotecaDB().contarPrestamosUsuario(userID),
+                perfil.buscarSubscrito(userID))) {
+            if (tipo.equals("domicilio")) {
+                recepcion.insertarPrestamoDomicilio(userID, isbn, biblioOrigen, dias, TipoEncargo.ENTREGA);
+            } else if (tipo.equals("recepcion")) {
+                recepcion.insertarSolicitudPrestamo(userID, isbn, biblioOrigen, dias);
+            }
         }
 
         req.setAttribute("orden",recepcion.getNumeroOrden());

@@ -34,6 +34,9 @@
           <li class="nav-item">
             <a class="nav-link" href="${pageContext.request.contextPath}/recepcion/incidencia-servlet">Incidencias</a>
           </li>
+          <li class="nav-item">
+            <a class="nav-link" href="${pageContext.request.contextPath}/recepcion/reportes-servlet">Reportes</a>
+          </li>
         </ul>
       </div>
       <div class="d-flex align-items-center">

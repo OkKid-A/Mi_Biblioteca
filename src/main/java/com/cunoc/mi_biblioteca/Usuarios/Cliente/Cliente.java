@@ -10,6 +10,7 @@ public class Cliente extends Usuario {
     private boolean subscrito;
     private boolean valido;
     private int prestAct;
+    private int incidencias;
     public Cliente(String username, String nombre, Tipo tipo, String correo, int id) {
         super(username, nombre, tipo, correo, id);
         this.saldo = 0;
@@ -81,5 +82,13 @@ public class Cliente extends Usuario {
 
     public void setPrestAct(int prestAct) {
         this.prestAct = prestAct;
+    }
+
+    public int getIncidencias() {
+        return incidencias;
+    }
+
+    public void setIncidencias(int incidencias) {
+        this.incidencias = incidencias;
     }
 }

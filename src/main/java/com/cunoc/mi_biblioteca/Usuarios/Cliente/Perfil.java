@@ -1,6 +1,7 @@
 package com.cunoc.mi_biblioteca.Usuarios.Cliente;
 
 import com.cunoc.mi_biblioteca.DB.Conector;
+import com.cunoc.mi_biblioteca.Recepcionista.Incidencia;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -136,6 +137,30 @@ public class Perfil {
             throw new RuntimeException(e);
         }
         return saldo;
+    }
+
+    public List<Incidencia> listarPorIncidencia(){
+        ResultSet resultSet = conector.selectFrom(String.format("SELECT  u.*,c.suspendido,c.id_cliente as id, COUNT(id_cliente) as incidencias" +
+                "    FROM prestamo p" +
+                "        INNER JOIN Mi_Biblioteca.renta r on p.id_prestamo = r.id_renta" +
+                "        INNER JOIN Mi_Biblioteca.cliente c on p.cliente_id = c.id_cliente" +
+                "        INNER JOIN Mi_Biblioteca.usuario u on c.id_cliente = u.id" +
+                "    GROUP BY id_cliente"));
+        List<Incidencia> clientesTotal = new ArrayList<>();
+        try {
+            if (resultSet.next()){
+                int i = 1;
+                do {
+                    clientesTotal.add(new Incidencia(resultSet.getInt("id"),resultSet.getString("username"),
+                            resultSet.getString("nombre"),resultSet.getBoolean("suspendido"),
+                            resultSet.getInt("incidencias")));
+                    i++;
+                }while (resultSet.next() && i<4);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return clientesTotal;
     }
 
     public List<Transaccion> obtenerTransacciones(String id){
