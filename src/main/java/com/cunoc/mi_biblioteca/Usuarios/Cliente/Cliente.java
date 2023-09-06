@@ -11,17 +11,27 @@ public class Cliente extends Usuario {
     private boolean valido;
     private int prestAct;
     private int incidencias;
+    private int cliente_id;
     public Cliente(String username, String nombre, Tipo tipo, String correo, int id) {
         super(username, nombre, tipo, correo, id);
         this.saldo = 0;
         this.subscrito = false;
         this.subscrito = false;
     }
-    public Cliente(String username, String nombre, Tipo tipo, String correo, int id, int saldo, boolean subscrito, boolean suspendido) {
+    public Cliente(String username, String nombre, Tipo tipo, String correo, int id, int cliente_id, int saldo, boolean subscrito, boolean suspendido) {
         super(username, nombre, tipo, correo, id);
         this.saldo = saldo;
         this.subscrito= subscrito;
         this.suspendido = suspendido;
+        this.cliente_id = cliente_id;
+    }
+
+    public int getCliente_id() {
+        return cliente_id;
+    }
+
+    public void setCliente_id(int cliente_id) {
+        this.cliente_id = cliente_id;
     }
 
     public double getSaldo() {

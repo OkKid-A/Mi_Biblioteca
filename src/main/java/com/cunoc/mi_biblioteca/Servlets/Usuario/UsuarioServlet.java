@@ -23,8 +23,15 @@ public class UsuarioServlet extends HttpServlet {
         Cliente cliente = (Cliente) req.getSession().getAttribute("cliente");
         Conector conector = (Conector) req.getSession().getAttribute("conector");
         Perfil perfil = new Perfil(conector);
-        List<Transaccion> transacciones = perfil.obtenerTransacciones(String.valueOf(cliente.getId()));
-        req.setAttribute("transacciones",transacciones);
+        try {
+            List<Transaccion> transacciones = perfil.obtenerTransacciones(String.valueOf(cliente.getCliente_id()));
+            if (transacciones!=null){
+                req.setAttribute("transacciones",transacciones);
+
+            }
+        } catch (NullPointerException e){
+            e.printStackTrace();
+        }
         req.setAttribute("usuario",usuario);
         req.getRequestDispatcher("/areas/cliente/cliente.jsp").forward(req,resp);
     }

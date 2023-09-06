@@ -1,21 +1,21 @@
 package com.cunoc.mi_biblioteca.DB;
 
 import com.cunoc.mi_biblioteca.Biblioteca.EstadoPrestamo;
-import com.cunoc.mi_biblioteca.Biblioteca.Prestamo;
 import com.cunoc.mi_biblioteca.Biblioteca.PrestamoResumen;
 import com.cunoc.mi_biblioteca.Usuarios.Cliente.Perfil;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class BibliotecaDB {
 
     private Conector conector;
+    private Perfil perfil;
 
     public BibliotecaDB(Conector conector) {
         this.conector = conector;
+        this.perfil = new Perfil(conector);
     }
 
     public int insertarRenta(int id_renta) throws SQLException {
@@ -63,11 +63,11 @@ public class BibliotecaDB {
         }
         return prestamo;
     }
-    public PrestamoResumen buscarPrestamo(String id, String idPrestamo){
+    public PrestamoResumen buscarPrestamo(String id_cliente, String idPrestamo){
         String querySelect = (String.format("SELECT p.*, l.nombre FROM prestamo p" +
                 " INNER JOIN libro l ON p.isbn = l.isbn WHERE cliente_id = %s " +
                 "AND (estado = %s OR estado = %s OR estado = %s) AND id_prestamo = %s"
-                ,id, conector.encomillar(String.valueOf(EstadoPrestamo.ACTIVO)),
+                ,id_cliente, conector.encomillar(String.valueOf(EstadoPrestamo.ACTIVO)),
                 conector.encomillar(String.valueOf(EstadoPrestamo.PENDIENTE)),
                 conector.encomillar(String.valueOf(EstadoPrestamo.VENCIDO)),
                 idPrestamo));
@@ -94,20 +94,18 @@ public class BibliotecaDB {
                 EstadoPrestamo.clasifica(resultSet.getString("estado"))
                 ,resultSet.getString("nombre"),
                 calendar.getTime(), resultSet.getInt("dias_reservados"));
-        String getUser = String.format("SELECT username FROM usuario WHERE id = %s",resultSet.getInt("cliente_id"));
-        try (ResultSet user = conector.selectFrom(getUser)) {
-            user.next();
-            String username = user.getString("username");
+        String getUser = String.valueOf(perfil.getUsuarioIDbyCliente(resultSet.getString("cliente_id")));
+            String username = getUserName(getUser);
             prestamoResumen.setNombreUsuario(username);
-        }
         return prestamoResumen;
     }
     public List<PrestamoResumen> buscarPrestamosActivos(String id){
         List<PrestamoResumen> prestamos = null;
-        String querySelect = (String.format("SELECT p.*, l.nombre FROM prestamo p" +
-                        " INNER JOIN libro l ON p.isbn = l.isbn WHERE cliente_id = %s AND (estado = %s OR estado = %s)"
-                ,id, conector.encomillar(String.valueOf(EstadoPrestamo.ACTIVO)),conector.encomillar(String.valueOf(EstadoPrestamo.VENCIDO))));
         try {
+            String clienteID = String.valueOf(perfil.getClienteIDByUsuario(id));
+            String querySelect = (String.format("SELECT p.*, l.nombre FROM prestamo p" +
+                            " INNER JOIN libro l ON p.isbn = l.isbn WHERE cliente_id = %s AND (estado = %s OR estado = %s)"
+                    ,id, conector.encomillar(String.valueOf(EstadoPrestamo.ACTIVO)),conector.encomillar(String.valueOf(EstadoPrestamo.VENCIDO))));
             ResultSet resultSet = conector.selectFrom(querySelect);
             if (resultSet.next()){
                 prestamos = listarPrestamos(resultSet);
@@ -135,10 +133,11 @@ public class BibliotecaDB {
 
     public List<PrestamoResumen> buscarPrestamosPendientes(String id){
         List<PrestamoResumen> prestamos = null;
-        String querySelect = (String.format("SELECT p.*, l.nombre FROM prestamo p" +
-                " INNER JOIN libro l ON p.isbn = l.isbn WHERE cliente_id = %s AND estado = %s"
-                ,id, conector.encomillar(String.valueOf(EstadoPrestamo.PENDIENTE))));
         try {
+            String clienteID = String.valueOf(perfil.getClienteIDByUsuario(id));
+            String querySelect = (String.format("SELECT p.*, l.nombre FROM prestamo p" +
+                            " INNER JOIN libro l ON p.isbn = l.isbn WHERE cliente_id = %s AND estado = %s"
+                    ,clienteID, conector.encomillar(String.valueOf(EstadoPrestamo.PENDIENTE))));
             ResultSet resultSet = conector.selectFrom(querySelect);
             if (resultSet.next()){
                 prestamos = listarPrestamos(resultSet);
@@ -161,9 +160,9 @@ public class BibliotecaDB {
         return prestamos;
     }
 
-    public int contarPrestamosUsuario(String userId){
+    public int contarPrestamosCliente(String clienteID){
         String countQuery = String.format("SELECT COUNT(id_prestamo) AS contar FROM prestamo WHERE estado = %s AND cliente_id = %s" ,
-                conector.encomillar(String.valueOf(EstadoPrestamo.ACTIVO)),userId);
+                conector.encomillar(String.valueOf(EstadoPrestamo.ACTIVO)),clienteID);
         ResultSet contado = conector.selectFrom(countQuery);
         int prestamos = 0;
         try {

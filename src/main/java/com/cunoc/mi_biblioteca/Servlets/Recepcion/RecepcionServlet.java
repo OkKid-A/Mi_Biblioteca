@@ -29,7 +29,6 @@ public class RecepcionServlet extends HttpServlet {
         Recepcion recepcion = new Recepcion(conector);
         String prestamoID = req.getParameter("solicitud");
         String rentaId = req.getParameter("renta");
-        getRecepcionista(req);
         if (rentaId!=null) {
             String alerta = null;
             try {
@@ -39,15 +38,18 @@ public class RecepcionServlet extends HttpServlet {
                 alerta = "Ocurrio un error";
             }
             req.setAttribute("alerta",alerta);
+            getRecepcionista(req);
             req.getRequestDispatcher("/areas/recepcion/inicio.jsp").forward(req,resp);
         } else if (prestamoID!=null){
+            int clienteID = recepcion.buscarClienteByPrestamo(Integer.parseInt(prestamoID));
             int userId = recepcion.buscarUsuarioByPrestamo(Integer.parseInt(prestamoID));
-            PrestamoResumen prestamoResumen = recepcion.getBibliotecaDB().buscarPrestamo(String.valueOf(userId),prestamoID);
-            int prestActivos = recepcion.getBibliotecaDB().contarPrestamosUsuario(String.valueOf(userId));
+            PrestamoResumen prestamoResumen = recepcion.getBibliotecaDB().buscarPrestamo(String.valueOf(clienteID),prestamoID);
+            int prestActivos = recepcion.getBibliotecaDB().contarPrestamosCliente(String.valueOf(clienteID));
             String nombreUsuario = recepcion.getBibliotecaDB().getUserName(String.valueOf(userId));
             req.setAttribute("userNombre",nombreUsuario);
             req.setAttribute("prestamoRes",prestamoResumen);
             req.setAttribute("libros",prestActivos);
+            getRecepcionista(req);
             req.getRequestDispatcher("/areas/recepcion/inicio.jsp").forward(req,resp);
         } else {
             resp.sendRedirect("/recepcion/inicio-servlet");

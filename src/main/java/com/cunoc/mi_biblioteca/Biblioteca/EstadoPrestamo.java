@@ -1,5 +1,7 @@
 package com.cunoc.mi_biblioteca.Biblioteca;
 
+import org.eclipse.tags.shaded.org.apache.regexp.RE;
+
 public enum EstadoPrestamo {
     ACTIVO,
     PENDIENTE,
@@ -19,6 +21,7 @@ public enum EstadoPrestamo {
             case "COMPLETADO":
                 return COMPLETADO;
             case "MALTRATO":
+            case "DAÑO":
                 return MALTRATO;
             case "PERDIDA":
                 return PERDIDA;

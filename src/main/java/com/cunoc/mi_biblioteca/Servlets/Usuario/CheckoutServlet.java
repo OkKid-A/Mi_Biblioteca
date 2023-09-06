@@ -47,17 +47,17 @@ public class CheckoutServlet extends HttpServlet {
         String isbn = req.getParameter("isbn");
         String biblioOrigen = req.getParameter("biblioteca");
         System.out.println(dias);
-        String userID = String.valueOf(((Usuario)req.getSession().getAttribute("currentUser")).getId());
+        String clienteID = String.valueOf(((Cliente)req.getSession().getAttribute("cliente")).getCliente_id());
         Conector conector = (Conector) req.getSession().getAttribute("conector");
         Bodega bodega = new Bodega(conector);
         Recepcion recepcion = new Recepcion(conector);
         Perfil perfil = new Perfil(conector);
-        if (perfil.clasificarValidez(recepcion.getBibliotecaDB().contarPrestamosUsuario(userID),
-                perfil.buscarSubscrito(userID))) {
+        if (perfil.clasificarValidez(recepcion.getBibliotecaDB().contarPrestamosCliente(clienteID),
+                perfil.buscarSubscrito(clienteID))) {
             if (tipo.equals("domicilio")) {
-                recepcion.insertarPrestamoDomicilio(userID, isbn, biblioOrigen, dias, TipoEncargo.ENTREGA);
+                recepcion.insertarPrestamoDomicilio(clienteID, isbn, biblioOrigen, dias, TipoEncargo.ENTREGA);
             } else if (tipo.equals("recepcion")) {
-                recepcion.insertarSolicitudPrestamo(userID, isbn, biblioOrigen, dias);
+                recepcion.insertarSolicitudPrestamo(clienteID, isbn, biblioOrigen, dias);
             }
         }
 

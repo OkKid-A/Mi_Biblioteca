@@ -48,7 +48,7 @@
                     <p class="card-text" id="detalles"></p>
                 </div>
                 <ul class="list-group list-group-flush">
-                    <li class="list-group-item">Usuario: ${cliente.id}</li>
+                    <li class="list-group-item">Usuario: ${cliente.cliente_id}</li>
                     <li class="list-group-item" id="nom">Nombre: ${cliente.nombre}</li>
                     <li class="list-group-item" id="usernam">Nombre de Usuario: ${cliente.username}</li>
                     <li class="list-group-item" id="saldo">Saldo: $${cliente.saldo}</li>
@@ -63,12 +63,12 @@
                     <div class="d-flex justify-content-center mb-2">
                         <form action="${pageContext.request.contextPath}/recepcion/incidencia-servlet?prestamo=${prestamoRes.id}&tipo=maltrato" method="post">
                             <input type="hidden" name="isbn" value="${prestamoRes.isbn}">
-                            <input type="hidden" name="userID" value="${cliente.id}">
+                            <input type="hidden" name="userID" value="${cliente.cliente_id}">
                             <button type="submit" class="btn btn-primary mr-3" >Reportar Maltrato</button>
                         </form>
                         <form action="${pageContext.request.contextPath}/recepcion/incidencia-servlet?prestamo=${prestamoRes.id}&tipo=perdida" method="post">
                             <input type="hidden" name="isbn" value="${prestamoRes.isbn}">
-                            <input type="hidden" name="userID" value="${cliente.id}">
+                            <input type="hidden" name="userID" value="${cliente.cliente_id}">
                             <button type="submit" class="btn btn-primary" >Reportar Perdida</button>
                         </form>
                     </div>

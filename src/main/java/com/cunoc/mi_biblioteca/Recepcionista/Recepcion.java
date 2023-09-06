@@ -36,9 +36,12 @@ public class Recepcion {
         ResultSet idSet = conector.selectFrom(selectId);
         idSet.next();
         int id = idSet.getInt("id");
-        String insertCliente = "INSERT INTO cliente (id_cliente,saldo,suspendido,subscrito) VALUES (?,?,?,?)";
-        conector.updateWithException(insertCliente, new String[]{String.valueOf(id),saldo, String.valueOf(0), String.valueOf(0)});
-        return id;
+        String insertCliente = "INSERT INTO cliente (saldo,suspendido,subscrito,usuario_id) VALUES (?,?,?,?)";
+        conector.updateWithException(insertCliente, new String[]{saldo, String.valueOf(0), String.valueOf(0),String.valueOf(id)});
+        String selectClienteid = String.format("SELECT id_cliente FROM cliente WHERE usuario_id = %s",conector.encomillar(String.valueOf(id)));
+        ResultSet clienteSet = conector.selectFrom(selectClienteid);
+        clienteSet.next();
+        return clienteSet.getInt("id_cliente");
     }
 
     public List<Cliente> buscarClientes(){
@@ -49,9 +52,9 @@ public class Recepcion {
             if (clientes.next()){
                 do {
                     Cliente cliente = new Cliente(clientes.getString("username"),clientes.getString("nombre"),
-                            Tipo.CLIENTE,clientes.getString("email"),clientes.getInt("id_cliente"),
+                            Tipo.CLIENTE,clientes.getString("email"),clientes.getInt("id"),clientes.getInt("id_cliente"),
                             clientes.getInt("saldo"),clientes.getBoolean("subscrito"),clientes.getBoolean("suspendido"));
-                    int prestAct = bibliotecaDB.contarPrestamosUsuario(String.valueOf(cliente.getId()));
+                    int prestAct = bibliotecaDB.contarPrestamosCliente(String.valueOf(cliente.getId()));
                     cliente.setPrestAct(prestAct);
                     Boolean valido = perfil.clasificarValidez(prestAct,cliente.isSubscrito());
                     cliente.setValido(valido);
@@ -65,15 +68,15 @@ public class Recepcion {
     }
 
     public Cliente obtenerClienteByID(String id) throws SQLException {
-        String selectQuery = String.format("SELECT c.*, u.*FROM cliente c INNER JOIN usuario u ON u.id=c.id_cliente WHERE c.id_cliente = %s",id);
+        String selectQuery = String.format("SELECT c.*, u.* FROM cliente c INNER JOIN usuario u ON u.id=c.usuario_id WHERE c.usuario_id = %s",id);
         ResultSet clienteSet = conector.selectFrom(selectQuery);
         Cliente cliente = null;
             if (clienteSet.next()){
                 do {
                     cliente = new Cliente(clienteSet.getString("username"),clienteSet.getString("nombre"),
-                            Tipo.CLIENTE,clienteSet.getString("email"),clienteSet.getInt("id_cliente"),
+                            Tipo.CLIENTE,clienteSet.getString("email"),clienteSet.getInt("id"),clienteSet.getInt("id_cliente"),
                             clienteSet.getInt("saldo"),clienteSet.getBoolean("subscrito"),clienteSet.getBoolean("suspendido"));
-                    int prestAct = bibliotecaDB.contarPrestamosUsuario(String.valueOf(cliente.getId()));
+                    int prestAct = bibliotecaDB.contarPrestamosCliente(String.valueOf(cliente.getId()));
                     cliente.setPrestAct(prestAct);
                     Boolean valido = perfil.clasificarValidez(prestAct,cliente.isSubscrito());
                     cliente.setValido(valido);
@@ -83,6 +86,25 @@ public class Recepcion {
     }
 
     public int buscarUsuarioByPrestamo(int prestamoID){
+        String query = String.format("SELECT cliente_id FROM prestamo WHERE id_prestamo = %s",conector.encomillar(String.valueOf(prestamoID)));
+        ResultSet resultSet = conector.selectFrom(query);
+        int userID = 0;
+        try {
+            if (resultSet.next()){
+                int cxID = resultSet.getInt("cliente_id");
+                String userQuery = String.format("SELECT usuario_id FROM cliente WHERE id_cliente = %s",cxID);
+                ResultSet user = conector.selectFrom(userQuery);
+                if (user.next()){
+                    userID = user.getInt("usuario_id");
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return userID;
+    }
+
+    public int buscarClienteByPrestamo(int prestamoID){
         String query = String.format("SELECT cliente_id FROM prestamo WHERE id_prestamo = %s",conector.encomillar(String.valueOf(prestamoID)));
         ResultSet resultSet = conector.selectFrom(query);
         int cxID = 0;
@@ -98,29 +120,30 @@ public class Recepcion {
 
     public List<PrestamoResumen> prestamosPendBiblioteca(String biblioID){
         List<PrestamoResumen> prestamos = null;
-        String querySelect = (String.format("SELECT p.*, l.nombre FROM prestamo p" +
-                        " INNER JOIN libro l ON p.isbn = l.isbn WHERE biblio_origen = %s AND estado = %s"
+        String querySelect = (String.format("SELECT p.*, l.nombre, u.nombre " +
+                        "FROM prestamo p " +
+                        "    INNER JOIN libro l ON p.isbn = l.isbn " +
+                        "    INNER JOIN cliente c ON p.cliente_id = c.id_cliente " +
+                        "    INNER JOIN usuario u ON c.usuario_id = u.id " +
+                        "WHERE biblio_origen = %s AND estado = %s"
                 ,biblioID, conector.encomillar(String.valueOf(EstadoPrestamo.PENDIENTE))));
         try {
             ResultSet resultSet = conector.selectFrom(querySelect);
             if (resultSet.next()){
-                String queryNombre = (String.format("SELECT nombre FROM usuario WHERE id = %s",resultSet.getInt("cliente_id")));
-                ResultSet nombreSet = conector.selectFrom(queryNombre);
-                nombreSet.next();
-                prestamos = listarPrestamos(resultSet,nombreSet);
+                prestamos = listarPrestamos(resultSet);
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
         return prestamos;
     }
-    public List<PrestamoResumen> listarPrestamos(ResultSet resultSet, ResultSet nombre) throws SQLException {
+    public List<PrestamoResumen> listarPrestamos(ResultSet resultSet) throws SQLException {
         List<PrestamoResumen> prestamos = new ArrayList<>();
         do {
             PrestamoResumen prestamoResumen = new PrestamoResumen(
                     resultSet.getInt("isbn"),resultSet.getDate("fecha_creacion"),
                     resultSet.getInt("id_prestamo"), EstadoPrestamo.clasifica(resultSet.getString("estado")),
-                    resultSet.getString("nombre"), nombre.getString("nombre"));
+                    resultSet.getString("l.nombre"), resultSet.getString("u.nombre"));
             prestamos.add(prestamoResumen);
         }while (resultSet.next());
         return prestamos;
@@ -140,6 +163,7 @@ public class Recepcion {
                 String.valueOf(EstadoPrestamo.PENDIENTE)});
         int numeroOrden = Integer.parseInt(getNumeroOrden());
         reducirDisponibles(biblio_origen,isbn);
+
         return numeroOrden;
     }
 

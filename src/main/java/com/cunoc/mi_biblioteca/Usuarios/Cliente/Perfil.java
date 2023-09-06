@@ -37,11 +37,11 @@ public class Perfil {
 
     }
     public void insertSuspension(String id,String descripcion){
-        String suspQuery = String.format("SELECT * FROM resumir WHERE usuario_id = %s AND estado = %s",id, conector.encomillar(String.valueOf(SuspensionEstado.PENDIENTE)));
-        String inQuery = "INSERT IGNORE INTO resumir (usuario_id,descripcion,estado) VALUES(?,?,?)";
+        String suspQuery = String.format("SELECT * FROM resumir WHERE cliente_id = %s AND estado = %s",id, conector.encomillar(String.valueOf(SuspensionEstado.PENDIENTE)));
+        String inQuery = "INSERT IGNORE INTO resumir (cliente_id,descripcion,estado) VALUES(?,?,?)";
         try(ResultSet resultSet = conector.selectFrom(suspQuery)) {
             if (resultSet.next()) {
-                String updateQuery= "UPDATE resumir SET descripcion = ? WHERE usuario_id = ? AND estado = ?";
+                String updateQuery= "UPDATE resumir SET descripcion = ? WHERE cliente_id = ? AND estado = ?";
                 conector.update(updateQuery,new String[]{descripcion,id, String.valueOf(SuspensionEstado.PENDIENTE)});
             }else {
                 conector.update(inQuery,new String[]{id,descripcion, String.valueOf(SuspensionEstado.PENDIENTE)});
@@ -52,7 +52,7 @@ public class Perfil {
 
     }
     public List<Suspension> buscarSuspension(String id){
-        String suspQuery = String.format("SELECT * FROM resumir WHERE usuario_id = %s",id);
+        String suspQuery = String.format("SELECT * FROM resumir WHERE cliente_id= %s",id);
         ResultSet resultSet = conector.selectFrom(suspQuery);
         List<Suspension> suspensiones = new ArrayList<>();
         Suspension suspension;
@@ -179,4 +179,34 @@ public class Perfil {
         }
         return transaccions;
     }
+
+    public int getClienteIDByUsuario(String userID) throws SQLException {
+        String query = String.format("SELECT id_cliente FROM cliente WHERE usuario_id = %s",userID);
+        ResultSet resultSet = conector.selectFrom(query);
+        resultSet.next();
+        return resultSet.getInt("id_cliente");
+    }
+
+    public int getRecepIDByUsuario(String userID) throws SQLException {
+        String query = String.format("SELECT id_recepcionista FROM recepcionista WHERE usuario_id = %s",userID);
+        ResultSet resultSet = conector.selectFrom(query);
+        resultSet.next();
+        return resultSet.getInt("id_recepcionista");
+    }
+
+    public int getTransIDByUsuario(String userID) throws SQLException {
+        String query = String.format("SELECT transportista_id FROM transportista WHERE usuario_id = %s",userID);
+        ResultSet resultSet = conector.selectFrom(query);
+        resultSet.next();
+        return resultSet.getInt("transportista_id");
+    }
+
+    public int getUsuarioIDbyCliente(String clienteID) throws SQLException {
+        String query = String.format("SELECT usuario_id FROM cliente WHERE id_cliente = %s",clienteID);
+        ResultSet resultSet = conector.selectFrom(query);
+        resultSet.next();
+        return resultSet.getInt("usuario_id");
+    }
+
+
 }

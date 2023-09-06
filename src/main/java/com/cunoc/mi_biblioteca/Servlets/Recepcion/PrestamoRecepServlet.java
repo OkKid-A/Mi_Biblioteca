@@ -3,13 +3,10 @@ package com.cunoc.mi_biblioteca.Servlets.Recepcion;
 import com.cunoc.mi_biblioteca.Biblioteca.Libro;
 import com.cunoc.mi_biblioteca.DB.Conector;
 import com.cunoc.mi_biblioteca.DB.LibroDB;
-import com.cunoc.mi_biblioteca.Envios.Bodega;
-import com.cunoc.mi_biblioteca.Envios.TipoEncargo;
 import com.cunoc.mi_biblioteca.Recepcionista.Recepcion;
 import com.cunoc.mi_biblioteca.Recepcionista.Recepcionista;
 import com.cunoc.mi_biblioteca.Usuarios.Cliente.Cliente;
 import com.cunoc.mi_biblioteca.Usuarios.Cliente.Perfil;
-import com.cunoc.mi_biblioteca.Usuarios.Usuario;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -66,7 +63,7 @@ public class PrestamoRecepServlet extends HttpServlet {
 
         } else if (clienteID == null) {
 
-        } else if (perfil.clasificarValidez(recepcion.getBibliotecaDB().contarPrestamosUsuario(clienteID),
+        } else if (perfil.clasificarValidez(recepcion.getBibliotecaDB().contarPrestamosCliente(clienteID),
                 perfil.buscarSubscrito(clienteID))) {
             rentaId = String.valueOf(recepcion.insertarSolicitudPrestamo(clienteID, isbn, String.valueOf(biblioOrigen), dias));
             try {

@@ -49,8 +49,15 @@
                     <td>${existencia.direccion}</td>
                     <td>${existencia.cantidad}</td>
                     <td>
-                        <a class="btn btn-dark" href="${pageContext.request.contextPath}/usuario/checkout-servlet?isbn=${libro.isbn}&biblioteca=${existencia.id}">
-                                Prestar</a>
+                        <c:choose>
+                            <c:when test="${existencia.cantidad>0}">
+                                <a class="btn btn-dark" href="${pageContext.request.contextPath}/usuario/checkout-servlet?isbn=${libro.isbn}&biblioteca=${existencia.id}">
+                                    Prestar</a>
+                            </c:when>
+                            <c:otherwise>
+                                Actualmente no disponible
+                            </c:otherwise>
+                        </c:choose>
                     </td>
                 </tr>
             </c:forEach>

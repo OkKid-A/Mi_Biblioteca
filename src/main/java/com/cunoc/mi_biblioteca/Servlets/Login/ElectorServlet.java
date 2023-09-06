@@ -3,7 +3,9 @@ package com.cunoc.mi_biblioteca.Servlets.Login;
 import com.cunoc.mi_biblioteca.DB.Conector;
 import com.cunoc.mi_biblioteca.Recepcionista.Recepcionista;
 import com.cunoc.mi_biblioteca.Usuarios.Cliente.Cliente;
+import com.cunoc.mi_biblioteca.Usuarios.Cliente.Perfil;
 import com.cunoc.mi_biblioteca.Usuarios.Tipo;
+import com.cunoc.mi_biblioteca.Usuarios.Transportista;
 import com.cunoc.mi_biblioteca.Usuarios.Usuario;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -25,6 +27,7 @@ public class ElectorServlet extends HttpServlet {
         HttpSession session = request.getSession();
         session.setMaxInactiveInterval(3600);
         session.setAttribute("conector",conector);
+        Perfil perfil = new Perfil(conector);
         Usuario user = null;
         String username = request.getParameter("username");
         String password = request.getParameter("password");
@@ -49,24 +52,29 @@ public class ElectorServlet extends HttpServlet {
             int id = user.getId();
             switch (user.getTipo()) {
                 case TRANSPORTISTA:
-                    request.getSession().setAttribute("transportista",user);
+                    int transID = perfil.getTransIDByUsuario(String.valueOf(user.getId()));
+                    Transportista transportista = new Transportista(user.getUsername(),user.getNombre(),user.getTipo(),
+                            user.getCorreo(),user.getId(),transID);
+                    request.getSession().setAttribute("transportista",transportista);
                     response.sendRedirect("/transporte/inicio-servlet");
                     break;
                 case RECEPCIONISTA:
                     query = String.format("SELECT * FROM recepcionista WHERE id_recepcionista = %s",id);
                     ResultSet recepcSet = conector.selectFrom(query);
+                    int recepId = perfil.getRecepIDByUsuario(String.valueOf(user.getId()));
                     if (recepcSet.next()){
-                        Recepcionista recepcionista = new Recepcionista(user.getUsername(),user.getNombre(),user.getTipo(),user.getCorreo(),user.getId(),
-                               recepcSet.getInt("puesto_biblioteca"));
+                        Recepcionista recepcionista = new Recepcionista(user.getUsername(),user.getNombre(),user.getTipo(),user.getCorreo(),user.getId()
+                               ,recepId,recepcSet.getInt("puesto_biblioteca"));
                         request.getSession().setAttribute("recepcionista",recepcionista);
                     }
                     response.sendRedirect("/recepcion/inicio-servlet");
                     break;
                 case CLIENTE:
-                    query = String.format("SELECT * FROM cliente WHERE id_cliente = %s",id);
+                    query = String.format("SELECT * FROM cliente WHERE usuario_id = %s",id);
                     ResultSet clienteSet = conector.selectFrom(query);
+                    int clienteID = perfil.getClienteIDByUsuario(String.valueOf(user.getId()));
                     if (clienteSet.next()){
-                        Cliente cliente = new Cliente(user.getUsername(),user.getNombre(),user.getTipo(),user.getCorreo(),user.getId(),
+                        Cliente cliente = new Cliente(user.getUsername(),user.getNombre(),user.getTipo(),user.getCorreo(),user.getId(), clienteID,
                                 clienteSet.getInt("saldo"),clienteSet.getBoolean("subscrito"),clienteSet.getBoolean("suspendido"));
                         System.out.println(cliente.isSubscrito());
                         request.getSession().setAttribute("cliente", cliente);

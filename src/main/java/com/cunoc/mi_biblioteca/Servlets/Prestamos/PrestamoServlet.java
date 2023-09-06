@@ -7,6 +7,7 @@ import com.cunoc.mi_biblioteca.DB.BibliotecaDB;
 import com.cunoc.mi_biblioteca.DB.Conector;
 import com.cunoc.mi_biblioteca.DB.LibroDB;
 import com.cunoc.mi_biblioteca.Usuarios.Cliente.Cliente;
+import com.cunoc.mi_biblioteca.Usuarios.Cliente.Perfil;
 import com.cunoc.mi_biblioteca.Usuarios.Usuario;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -15,6 +16,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.List;
 
 @WebServlet(name = "PrestamoServlet", urlPatterns = "/prestamo/usuario-servlet")
@@ -27,12 +29,18 @@ public class PrestamoServlet extends HttpServlet {
         String prestamo = req.getParameter("prestamo");
         BibliotecaDB bibliotecaDB = new BibliotecaDB(conector);
         String usuarioID = String.valueOf(usuario.getId()) ;
+        String clienteID = null;
+        try {
+            clienteID = String.valueOf((new Perfil(conector)).getClienteIDByUsuario(usuarioID));
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
         List<PrestamoResumen> prestamosActivos = bibliotecaDB.buscarPrestamosActivos(usuarioID);
         List<PrestamoResumen> prestamoPending = bibliotecaDB.buscarPrestamosPendientes(usuarioID);
         LibroDB libroDB = new LibroDB(conector);
         String alerta = req.getParameter("alerta");
         if (prestamo!=null){
-            PrestamoResumen prestamoResumen = bibliotecaDB.buscarPrestamo(usuarioID, prestamo);
+            PrestamoResumen prestamoResumen = bibliotecaDB.buscarPrestamo(clienteID, prestamo);
             Libro libro =  libroDB.buscarLibro(String.valueOf(prestamoResumen.getIsbn()));
             req.setAttribute("libro",libro);
             req.setAttribute("prestamoRes",prestamoResumen);

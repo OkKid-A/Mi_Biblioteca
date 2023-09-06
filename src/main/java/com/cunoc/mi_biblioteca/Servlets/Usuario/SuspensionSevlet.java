@@ -20,9 +20,9 @@ public class SuspensionSevlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         Conector conector = (Conector) req.getSession().getAttribute("conector");
-        Usuario usuario = (Usuario) req.getSession().getAttribute("currentUser");
+        Cliente cliente = (Cliente) req.getSession().getAttribute("cliente");
         Perfil perfil = new Perfil(conector);
-        List<Suspension> suspensiones = perfil.buscarSuspension(String.valueOf(usuario.getId()));
+        List<Suspension> suspensiones = perfil.buscarSuspension(String.valueOf(cliente.getCliente_id()));
         req.setAttribute("suspensiones",suspensiones);
         req.getRequestDispatcher("/areas/cliente/suspensiones.jsp").forward(req,resp);
     }
@@ -30,11 +30,11 @@ public class SuspensionSevlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         Conector conector = (Conector) req.getSession().getAttribute("conector");
-        Usuario usuario = (Usuario) req.getSession().getAttribute("currentUser");
+        Cliente cliente = (Cliente) req.getSession().getAttribute("cliente");
         Perfil perfil = new Perfil(conector);
         String inDescripcion = req.getParameter("inDescripcion");
         if (inDescripcion != null){
-            perfil.insertSuspension(String.valueOf(usuario.getId()),inDescripcion);
+            perfil.insertSuspension(String.valueOf(cliente.getCliente_id()),inDescripcion);
         }
         resp.sendRedirect("/usuario/suspension-servlet");
     }
