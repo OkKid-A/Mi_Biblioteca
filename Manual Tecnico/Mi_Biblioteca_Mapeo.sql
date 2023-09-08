@@ -304,3 +304,9 @@ create table if not exists traslado_detalle
         foreign key (id_traslado) references traslado (numero_encargo)
 );
 
+INSERT INTO parametros (nombre, valor) VALUES ('Dias de suspension por incidencia',25);
+INSERT INTO parametros (nombre, valor) VALUES ('Fecha actual','2023-09-08');
+INSERT INTO parametros (nombre, valor) VALUES ('Limite de dias de prestamo premium',15);
+INSERT INTO parametros (nombre, valor) VALUES ('Limite de dias del prestamo',8);
+INSERT INTO parametros (nombre, valor) VALUES ('Limite de libros',5);
+INSERT INTO parametros (nombre, valor) VALUES ('Limite de libros premium',10);
