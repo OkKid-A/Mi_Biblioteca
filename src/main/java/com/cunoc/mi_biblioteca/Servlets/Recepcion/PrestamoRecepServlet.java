@@ -74,6 +74,6 @@ public class PrestamoRecepServlet extends HttpServlet {
         } else {
 
         }
-        resp.sendRedirect("recepcion/busqueda-servlet?rentaId=" + rentaId);
+        resp.sendRedirect("/recepcion/busqueda-servlet?rentaId=" + rentaId);
     }
 }

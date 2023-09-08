@@ -1,5 +1,6 @@
 package com.cunoc.mi_biblioteca.Recepcionista;
 
+import com.cunoc.mi_biblioteca.Admin.Predeterminador;
 import com.cunoc.mi_biblioteca.Biblioteca.EstadoPrestamo;
 import com.cunoc.mi_biblioteca.Biblioteca.PrestamoResumen;
 import com.cunoc.mi_biblioteca.DB.BibliotecaDB;
@@ -21,12 +22,14 @@ public class Recepcion {
     private Bodega bodega;
     private BibliotecaDB bibliotecaDB;
     public Perfil perfil;
+    private Predeterminador predeterminador;
 
     public Recepcion(Conector conector) {
         this.conector = conector;
         this.bodega = new Bodega(conector);
         this.bibliotecaDB = new BibliotecaDB(conector);
         this.perfil = new Perfil(conector);
+        this.predeterminador = new Predeterminador(conector);
     }
 
     public int crearCliente(String name, String username, String email, String password, String saldo) throws SQLException {
@@ -151,15 +154,15 @@ public class Recepcion {
 
     public void insertarPrestamo(String user, String isbn, String biblio_origen, String dias, String recepcionistaID){
         String queryPrestamo= "INSERT INTO prestamo (cliente_id, isbn, biblio_origen, dias_reservados, fecha_creacion, recepcionista_id," +
-                "tipo_entrega,estado) VALUES (?,?,?,?,curdate(),?,?)";
-        conector.update(queryPrestamo,new String[]{user,isbn,biblio_origen,dias, recepcionistaID,String.valueOf(TipoEntrega.RECEPCION),
+                "tipo_entrega,estado) VALUES (?,?,?,?,?,?,?)";
+        conector.update(queryPrestamo,new String[]{user,isbn,biblio_origen,dias, predeterminador.obtenerFechaString(),recepcionistaID,String.valueOf(TipoEntrega.RECEPCION),
                 String.valueOf(EstadoPrestamo.PENDIENTE)});
     }
 
     public int insertarSolicitudPrestamo(String user, String isbn, String biblio_origen, String dias){
         String queryPrestamo= "INSERT INTO prestamo (cliente_id, isbn, biblio_origen, dias_reservados, fecha_creacion," +
-                "tipo_entrega,estado) VALUES (?,?,?,?,curdate(),?,?)";
-        conector.update(queryPrestamo,new String[]{user,isbn,biblio_origen,dias,String.valueOf(TipoEntrega.RECEPCION),
+                "tipo_entrega,estado) VALUES (?,?,?,?,?,?,?)";
+        conector.update(queryPrestamo,new String[]{user,isbn,biblio_origen,dias,predeterminador.obtenerFechaString(),String.valueOf(TipoEntrega.RECEPCION),
                 String.valueOf(EstadoPrestamo.PENDIENTE)});
         int numeroOrden = Integer.parseInt(getNumeroOrden());
         reducirDisponibles(biblio_origen,isbn);
@@ -170,8 +173,8 @@ public class Recepcion {
     public void insertarPrestamoDomicilio(String user, String isbn, String biblio_origen, String dias, TipoEncargo tipoEncargo){
         String transportistaID = bodega.insertarEncargo(isbn,biblio_origen,tipoEncargo);
         String queryPrestamo= "INSERT INTO prestamo (cliente_id, isbn, biblio_origen, dias_reservados, fecha_creacion," +
-                "tipo_entrega,transportista_id, estado) VALUES (?,?,?,?,curdate(),?,?,?)";
-        conector.update(queryPrestamo,new String[]{user,isbn,biblio_origen,dias, String.valueOf(TipoEntrega.DOMICILIO),transportistaID,
+                "tipo_entrega,transportista_id, estado) VALUES (?,?,?,?,?,?,?,?)";
+        conector.update(queryPrestamo,new String[]{user,isbn,biblio_origen,dias, predeterminador.obtenerFechaString(),String.valueOf(TipoEntrega.DOMICILIO),transportistaID,
                 String.valueOf(EstadoPrestamo.PENDIENTE)});
         bodega.insertarEntrega(isbn,user);
         reducirDisponibles(biblio_origen,isbn);
@@ -183,6 +186,18 @@ public class Recepcion {
             if (resultados.next()){
                 String insertQuery = "UPDATE existencia SET disponibles = ? WHERE id_biblioteca = ? AND isbn = ?";
                 conector.update(insertQuery,new String[]{String.valueOf((resultados.getInt("disponibles")-1)),biblio_origen,isbn});
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void addDisponibles(String biblio_origen, String isbn){
+        try (ResultSet resultados = conector.selectFrom(String.format("SELECT b.*, e.disponibles, e.isbn FROM biblioteca b" +
+                " INNER JOIN existencia e ON b.id_biblioteca=e.id_biblioteca WHERE isbn = %s AND e.id_biblioteca = %s;", isbn,biblio_origen))) {
+            if (resultados.next()){
+                String insertQuery = "UPDATE existencia SET disponibles = ? WHERE id_biblioteca = ? AND isbn = ?";
+                conector.update(insertQuery,new String[]{String.valueOf((resultados.getInt("disponibles")+1)),biblio_origen,isbn});
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);

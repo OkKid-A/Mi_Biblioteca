@@ -60,7 +60,6 @@ public class CheckoutServlet extends HttpServlet {
                 recepcion.insertarSolicitudPrestamo(clienteID, isbn, biblioOrigen, dias);
             }
         }
-
         req.setAttribute("orden",recepcion.getNumeroOrden());
         resp.sendRedirect("/areas/cliente/cliente.jsp");
     }

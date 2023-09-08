@@ -4,6 +4,7 @@ import com.cunoc.mi_biblioteca.Admin.Predeterminador;
 import com.cunoc.mi_biblioteca.Biblioteca.EstadoPrestamo;
 import com.cunoc.mi_biblioteca.Biblioteca.EstadoRenta;
 import com.cunoc.mi_biblioteca.Biblioteca.PrestamoResumen;
+import com.cunoc.mi_biblioteca.Recepcionista.Recepcion;
 import com.cunoc.mi_biblioteca.Usuarios.Cliente.Perfil;
 
 import java.sql.ResultSet;
@@ -23,8 +24,8 @@ public class BibliotecaDB {
     }
 
     public int insertarRenta(int id_renta) throws SQLException {
-        String insertRenta = "INSERT INTO renta (id_prestamo,fecha_inicio) VALUES (?,curdate())";
-        conector.updateWithException(insertRenta,new String[]{String.valueOf(id_renta)});
+        String insertRenta = "INSERT INTO renta (id_prestamo,fecha_inicio) VALUES (?,?)";
+        conector.updateWithException(insertRenta,new String[]{String.valueOf(id_renta),predeterminador.obtenerFechaString()});
         String updatePrestamo = "UPDATE prestamo SET estado = ? WHERE id_prestamo = ?";
         conector.update(updatePrestamo,new String[]{String.valueOf(EstadoPrestamo.ACTIVO),String.valueOf(id_renta)});
         return id_renta;
@@ -206,7 +207,7 @@ public class BibliotecaDB {
     }
 
     public void finalizarPrestamo(String id_prestamo) throws SQLException {
-        String getPrestamo = String.format("SELECT p.*, r.fecha_inicio, r,id_renta " +
+        String getPrestamo = String.format("SELECT p.*, r.fecha_inicio, r.id_renta " +
                 "                        FROM prestamo p " +
                 "                            INNER JOIN renta r ON p.id_prestamo = r.id_prestamo " +
                 "                        WHERE p.id_prestamo = %s", id_prestamo);
@@ -224,10 +225,13 @@ public class BibliotecaDB {
                         String.valueOf(EstadoRenta.MORA),
                         String.valueOf(resultSet.getInt("id_renta"))
                 });
+                insertarSuspension(resultSet.getInt("cliente_id"));
                 perfil.restarSaldo(predeterminador.multaMora(), String.valueOf(resultSet.getInt("cliente_id")));
             } else {
                 conector.update(estado, new String[]{String.valueOf(EstadoPrestamo.FINALIZADO),id_prestamo});
             }
+            (new Recepcion(conector)).addDisponibles(String.valueOf(resultSet.getInt("biblio_origen")),
+                    String.valueOf(resultSet.getInt("isbn")));
         }
         String update = "UPDATE prestamo SET ";
     }

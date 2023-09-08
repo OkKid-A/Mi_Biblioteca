@@ -87,7 +87,7 @@ public class ElectorServlet extends HttpServlet {
                     Admin admin = new Admin(user.getUsername(),user.getNombre(),user.getTipo(),
                             user.getCorreo(),user.getId(),adminId);
                     request.getSession().setAttribute("admin",admin);
-                    response.sendRedirect("/admin/inicio-servlet");
+                    response.sendRedirect("/admin/parametros-servlet");
                     break;
             }
         } catch (IOException |NullPointerException e) {

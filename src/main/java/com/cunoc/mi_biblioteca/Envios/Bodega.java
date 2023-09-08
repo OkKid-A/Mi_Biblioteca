@@ -1,5 +1,6 @@
 package com.cunoc.mi_biblioteca.Envios;
 
+import com.cunoc.mi_biblioteca.Admin.Predeterminador;
 import com.cunoc.mi_biblioteca.DB.Conector;
 import org.eclipse.tags.shaded.org.apache.regexp.RE;
 
@@ -12,9 +13,11 @@ import java.util.List;
 public class Bodega {
 
     private Conector conector;
+    private Predeterminador predeterminador;
 
     public Bodega(Conector conector){
         this.conector = conector;
+        this.predeterminador = new Predeterminador(conector);
     }
 
     public List<Entrega> buscarEntregasPorID(String transID) throws SQLException {
@@ -47,13 +50,13 @@ public class Bodega {
     public String insertarEncargo(String isbn, String biblio_origen, TipoEncargo tipoEncargo){
 
         String insertQuery = "INSERT INTO encargo (estado, transportista_id,fecha,biblio_origen,tipo_encargo)" +
-                "VALUES (?,?,curdate(),?,?)";
+                "VALUES (?,?,?,?,?)";
         String transportistaID = null;
         try {
                 transportistaID = asignarTransportista();
                 System.out.println(transportistaID);
             conector.update(insertQuery, new String[]{String.valueOf(EstadoEntrega.PENDIENTE), String.valueOf(transportistaID),
-                    biblio_origen, String.valueOf(tipoEncargo)});
+                    predeterminador.obtenerFechaString(),biblio_origen, String.valueOf(tipoEncargo)});
             return transportistaID;
         } catch (SQLException e) {
             e.printStackTrace();

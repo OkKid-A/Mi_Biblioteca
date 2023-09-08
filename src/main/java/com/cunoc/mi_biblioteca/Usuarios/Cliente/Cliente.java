@@ -70,6 +70,8 @@ public class Cliente extends Usuario {
         return susp;
     }
 
+
+
     public boolean isValido() {
         return valido;
     }

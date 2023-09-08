@@ -21,7 +21,7 @@ public class BusquedaServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         Conector conector = new Conector();
         Filtro filtro = new Filtro(conector);
-        List<Libro> listaLibros = List.of(filtro.filtrarPorUnico());
+        List<Libro> listaLibros = List.of((filtro.filtrarPorUnico()));
         req.setAttribute("libros", listaLibros);
         RequestDispatcher dispatcher = getServletContext().getRequestDispatcher("/areas/cliente/busqueda.jsp");
         req.getRequestDispatcher("/areas/cliente/busqueda.jsp").forward(req,resp);

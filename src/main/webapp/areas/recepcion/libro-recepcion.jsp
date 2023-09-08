@@ -49,9 +49,10 @@
                         <td>${usuario.prestAct}</td>
                         <td>${usuario.subscribed}</td>
                         <td>$${usuario.saldo}</td>
-                        <td><a class="btn btn-dark mb-0" id="terminar" type="button" href="${pageContext.request.contextPath}/recepcion/prestamo-servlet?isbn=${libro.isbn}">
-                            Cambiar</a>
-                        </td>
+
+                                <td><a class="btn btn-dark mb-0" id="terminar" type="button" href="${pageContext.request.contextPath}/recepcion/prestamo-servlet?isbn=${libro.isbn}">
+                                    Cambiar</a>
+                                </td>
                     </tr>
                     </tbody>
                 </table>
@@ -156,6 +157,9 @@
                             <td>$${cliente.saldo}</td>
                             <td>
                                 <c:choose>
+                                    <c:when test="${cliente.suspendido}">
+                                        Esta suspendido
+                                    </c:when>
                                     <c:when test="${cliente.valido}">
                                             <a class="btn btn-dark mb-0" id="finalizar"
                                             href="${pageContext.request.contextPath}/recepcion/prestamo-servlet?isbn=${libro.isbn}&cliente=${cliente.id}">Seleccionar</a>

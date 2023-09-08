@@ -50,12 +50,22 @@
                     <td>${existencia.cantidad}</td>
                     <td>
                         <c:choose>
-                            <c:when test="${existencia.cantidad>0}">
-                                <a class="btn btn-dark" href="${pageContext.request.contextPath}/usuario/checkout-servlet?isbn=${libro.isbn}&biblioteca=${existencia.id}">
-                                    Prestar</a>
+                            <c:when test="${cliente.suspendido}">
+                                Estas suspendido
+                            </c:when>
+                            <c:when test="${valido}">
+                                <c:choose>
+                                <c:when test="${existencia.cantidad>0}">
+                                    <a class="btn btn-dark" href="${pageContext.request.contextPath}/usuario/checkout-servlet?isbn=${libro.isbn}&biblioteca=${existencia.id}">
+                                        Prestar</a>
+                                </c:when>
+                                <c:otherwise>
+                                    Actualmente no disponible
+                                </c:otherwise>
+                                </c:choose>
                             </c:when>
                             <c:otherwise>
-                                Actualmente no disponible
+                                Alcanzaste el limite de prestamos
                             </c:otherwise>
                         </c:choose>
                     </td>

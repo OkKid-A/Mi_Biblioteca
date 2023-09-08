@@ -134,7 +134,7 @@ public class Perfil {
         double saldo = 0;
         try {
             resultSet.next();
-            saldo = resultSet.getInt("saldo");
+            saldo = resultSet.getDouble("saldo");
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

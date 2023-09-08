@@ -15,7 +15,9 @@
     <maven.compiler.target>11</maven.compiler.target>
     <maven.compiler.source>11</maven.compiler.source>
     <junit.version>5.9.2</junit.version>
+      <url>http://localhost:8080/</url>
   </properties>
+
 
   <dependencies>
 <dependency>
@@ -59,12 +61,14 @@
   </dependencies>
 
   <build>
-    <plugins>
-        <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-war-plugin</artifactId>
-        <version>3.3.2</version>
-      </plugin>
-    </plugins>
+      <finalName>Mi_Biblioteca</finalName>
+      <plugins>
+          <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-war-plugin</artifactId>
+              <version>3.3.2</version>
+          </plugin>
+      </plugins>
   </build>
+
 </project>

@@ -1,5 +1,6 @@
 package com.cunoc.mi_biblioteca.Servlets.Recepcion;
 
+import com.cunoc.mi_biblioteca.Admin.Predeterminador;
 import com.cunoc.mi_biblioteca.Biblioteca.EstadoPrestamo;
 import com.cunoc.mi_biblioteca.Biblioteca.EstadoRenta;
 import com.cunoc.mi_biblioteca.Biblioteca.Libro;
@@ -31,6 +32,7 @@ public class IncidenciaServlet extends HttpServlet {
         BibliotecaDB bibliotecaDB = new BibliotecaDB(conector);
         List<PrestamoResumen> prestamosActivos = bibliotecaDB.buscarPrestamosActivos();
         String alerta = req.getParameter("alerta");
+        req.removeAttribute("alerta");
         if (prestamo!=null){
             LibroDB libroDB = new LibroDB(conector);
             Recepcion recepcion = new Recepcion(conector);
@@ -52,10 +54,13 @@ public class IncidenciaServlet extends HttpServlet {
             }
             if (alerta.equals("success")){
                 alerta = "Se ha reportado la incidencia";
+                req.setAttribute("alerta",alerta);
             }
-            req.setAttribute("alerta",alerta);
+            if (alerta.equals("success-final")){
+                alerta = "Se completo el prestamos sin incidencia";
+                req.setAttribute("alerta",alerta );
+            }
         }
-        req.removeAttribute("alerta");
         req.setAttribute("prestamosActivos",prestamosActivos);
         req.getRequestDispatcher("/areas/recepcion/incidencias.jsp").forward(req,resp);
     }
@@ -69,15 +74,22 @@ public class IncidenciaServlet extends HttpServlet {
         String id = req.getParameter("userID");
         String action = req.getParameter("action");
         BibliotecaDB bibliotecaDB = new BibliotecaDB(conector);
+        Recepcion recepcion = new Recepcion(conector);
         LibroDB libroDB = new LibroDB(conector);
         Libro libro =  libroDB.buscarLibro(isbn);
         Perfil perfil = new Perfil(conector);
         double precio = 0;
+        double saldo = 0;
+        double precioMulta = (new Predeterminador(conector)).multaMora();
         if (libro!=null){
             precio = libro.getPrecio();
         }
         String alerta = "failMoney";
-        double saldo = perfil.obtenerSaldo(id);
+        if (id!=null) {
+            saldo = perfil.obtenerSaldo(id);
+        } else if (prestamo!=null){
+            saldo = perfil.obtenerSaldo(String.valueOf(recepcion.buscarClienteByPrestamo(Integer.parseInt(prestamo))));
+        }
         if (prestamo!=null && tipo != null && saldo >= precio){
             if (tipo.equals("maltrato")){
                 bibliotecaDB.insertarIncidencia(EstadoRenta.DAÑO,precio, Integer.parseInt(prestamo), id);
@@ -85,13 +97,14 @@ public class IncidenciaServlet extends HttpServlet {
                 bibliotecaDB.insertarIncidencia(EstadoRenta.PERDIDA,precio, Integer.parseInt(prestamo), id);
             }
             alerta = "success";
-        } else if (prestamo!=null && action!= null){
+        } else if (prestamo!=null && action!= null && saldo >= precioMulta){
             try {
                 bibliotecaDB.finalizarPrestamo(prestamo);
+                alerta = "success-final";
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
-        } else if (saldo < precio){
+        } else if (saldo < precio || saldo < precioMulta){
             alerta = "failMoney";
         }
         String link = "/recepcion/incidencia-servlet?alerta="+alerta;
