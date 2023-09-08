@@ -1,5 +1,6 @@
 package com.cunoc.mi_biblioteca.Servlets.Login;
 
+import com.cunoc.mi_biblioteca.Admin.Admin;
 import com.cunoc.mi_biblioteca.DB.Conector;
 import com.cunoc.mi_biblioteca.Recepcionista.Recepcionista;
 import com.cunoc.mi_biblioteca.Usuarios.Cliente.Cliente;
@@ -22,7 +23,7 @@ import java.sql.SQLException;
 public class ElectorServlet extends HttpServlet {
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         Conector conector = new Conector();
         HttpSession session = request.getSession();
         session.setMaxInactiveInterval(3600);
@@ -46,7 +47,7 @@ public class ElectorServlet extends HttpServlet {
             }
             conector.closeThis();
         } catch (SQLException e) {
-            e.printStackTrace();
+            response.sendRedirect("/login/elector-servlet");
         }
         try {
             int id = user.getId();
@@ -59,7 +60,7 @@ public class ElectorServlet extends HttpServlet {
                     response.sendRedirect("/transporte/inicio-servlet");
                     break;
                 case RECEPCIONISTA:
-                    query = String.format("SELECT * FROM recepcionista WHERE id_recepcionista = %s",id);
+                    query = String.format("SELECT * FROM recepcionista WHERE usuario_id = %s",id);
                     ResultSet recepcSet = conector.selectFrom(query);
                     int recepId = perfil.getRecepIDByUsuario(String.valueOf(user.getId()));
                     if (recepcSet.next()){
@@ -82,7 +83,11 @@ public class ElectorServlet extends HttpServlet {
                     response.sendRedirect("/usuario/inicio-servlet");
                     break;
                 case ADMIN:
-                    response.sendRedirect("admin/usuarios-servlet");
+                    int adminId = perfil.getAdminIDByUsuario(String.valueOf(user.getId()));
+                    Admin admin = new Admin(user.getUsername(),user.getNombre(),user.getTipo(),
+                            user.getCorreo(),user.getId(),adminId);
+                    request.getSession().setAttribute("admin",admin);
+                    response.sendRedirect("/admin/inicio-servlet");
                     break;
             }
         } catch (IOException |NullPointerException e) {

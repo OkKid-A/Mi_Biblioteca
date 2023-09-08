@@ -1,6 +1,7 @@
 package com.cunoc.mi_biblioteca.Servlets.Prestamos;
 
 import com.cunoc.mi_biblioteca.Biblioteca.EstadoPrestamo;
+import com.cunoc.mi_biblioteca.Biblioteca.EstadoRenta;
 import com.cunoc.mi_biblioteca.Biblioteca.Libro;
 import com.cunoc.mi_biblioteca.Biblioteca.PrestamoResumen;
 import com.cunoc.mi_biblioteca.DB.BibliotecaDB;
@@ -25,10 +26,10 @@ public class PrestamoServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         Conector conector = (Conector) req.getSession().getAttribute("conector");
-        Usuario usuario = (Usuario) req.getSession().getAttribute("currentUser");
+        Cliente cliente  = (Cliente) req.getSession().getAttribute("cliente");
         String prestamo = req.getParameter("prestamo");
         BibliotecaDB bibliotecaDB = new BibliotecaDB(conector);
-        String usuarioID = String.valueOf(usuario.getId()) ;
+        String usuarioID = String.valueOf(cliente.getId()) ;
         String clienteID = null;
         try {
             clienteID = String.valueOf((new Perfil(conector)).getClienteIDByUsuario(usuarioID));
@@ -71,10 +72,10 @@ public class PrestamoServlet extends HttpServlet {
         String alerta = "failMoney";
         if (prestamo!=null && tipo != null && cliente.getSaldo() >= precio){
             if (tipo.equals("maltrato")){
-                bibliotecaDB.insertarIncidencia(EstadoPrestamo.MALTRATO,precio, Integer.parseInt(prestamo), String.valueOf(usuario.getId()));
+                bibliotecaDB.insertarIncidencia(EstadoRenta.DAÑO,precio, Integer.parseInt(prestamo), String.valueOf(cliente.getCliente_id()));
                 cliente.setSaldo(cliente.getSaldo()-precio);
             } else if (tipo.equals("perdida")){
-                bibliotecaDB.insertarIncidencia(EstadoPrestamo.PERDIDA,precio, Integer.parseInt(prestamo), String.valueOf(usuario.getId()));
+                bibliotecaDB.insertarIncidencia(EstadoRenta.PERDIDA,precio, Integer.parseInt(prestamo), String.valueOf(cliente.getCliente_id()));
                 cliente.setSaldo(cliente.getSaldo()-precio);
             }
              alerta = "success";

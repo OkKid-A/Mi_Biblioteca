@@ -1,6 +1,7 @@
 package com.cunoc.mi_biblioteca.Servlets.Recepcion;
 
 import com.cunoc.mi_biblioteca.Biblioteca.EstadoPrestamo;
+import com.cunoc.mi_biblioteca.Biblioteca.EstadoRenta;
 import com.cunoc.mi_biblioteca.Biblioteca.Libro;
 import com.cunoc.mi_biblioteca.Biblioteca.PrestamoResumen;
 import com.cunoc.mi_biblioteca.DB.BibliotecaDB;
@@ -66,20 +67,30 @@ public class IncidenciaServlet extends HttpServlet {
         String tipo = req.getParameter("tipo");
         String isbn = req.getParameter("isbn");
         String id = req.getParameter("userID");
+        String action = req.getParameter("action");
         BibliotecaDB bibliotecaDB = new BibliotecaDB(conector);
         LibroDB libroDB = new LibroDB(conector);
         Libro libro =  libroDB.buscarLibro(isbn);
         Perfil perfil = new Perfil(conector);
-        double precio = libro.getPrecio();
+        double precio = 0;
+        if (libro!=null){
+            precio = libro.getPrecio();
+        }
         String alerta = "failMoney";
         double saldo = perfil.obtenerSaldo(id);
         if (prestamo!=null && tipo != null && saldo >= precio){
             if (tipo.equals("maltrato")){
-                bibliotecaDB.insertarIncidencia(EstadoPrestamo.MALTRATO,precio, Integer.parseInt(prestamo), id);
+                bibliotecaDB.insertarIncidencia(EstadoRenta.DAÑO,precio, Integer.parseInt(prestamo), id);
             } else if (tipo.equals("perdida")){
-                bibliotecaDB.insertarIncidencia(EstadoPrestamo.PERDIDA,precio, Integer.parseInt(prestamo), id);
+                bibliotecaDB.insertarIncidencia(EstadoRenta.PERDIDA,precio, Integer.parseInt(prestamo), id);
             }
             alerta = "success";
+        } else if (prestamo!=null && action!= null){
+            try {
+                bibliotecaDB.finalizarPrestamo(prestamo);
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
         } else if (saldo < precio){
             alerta = "failMoney";
         }

@@ -1,5 +1,7 @@
 package com.cunoc.mi_biblioteca.Usuarios.Cliente;
 
+import com.cunoc.mi_biblioteca.Biblioteca.EstadoPrestamo;
+import com.cunoc.mi_biblioteca.Biblioteca.EstadoRenta;
 import com.cunoc.mi_biblioteca.DB.Conector;
 import com.cunoc.mi_biblioteca.Recepcionista.Incidencia;
 
@@ -104,20 +106,20 @@ public class Perfil {
         conector.update(nombreQuery,new String[]{password,id});
     }
 
-    public void editarSubscripcion(double costo, String id, boolean subscrito){
+    public void editarSubscripcion(double costo, String cliente_id, boolean subscrito){
         String subscritoQuery = "UPDATE cliente SET subscrito = ? WHERE id_cliente = ?";
         if (subscrito){
-            conector.update(subscritoQuery, new String[]{String.valueOf(1), id});
-            restarSaldo(costo,id);
+            conector.update(subscritoQuery, new String[]{String.valueOf(1), cliente_id});
+            restarSaldo(costo,cliente_id);
         } else {
-            conector.update(subscritoQuery, new String[]{String.valueOf(0), id});
+            conector.update(subscritoQuery, new String[]{String.valueOf(0), cliente_id});
         }
     }
 
-    public double restarSaldo(double monto, String id) {
-        Double saldo = obtenerSaldo(id);
+    public double restarSaldo(double monto, String cliente_id) {
+        Double saldo = obtenerSaldo(cliente_id);
         saldo = saldo - monto;
-        conector.update("UPDATE cliente SET saldo = ? WHERE id_cliente = ?", new String[]{String.valueOf(saldo), id});
+        conector.update("UPDATE cliente SET saldo = ? WHERE id_cliente = ?", new String[]{String.valueOf(saldo), cliente_id});
         return saldo;
     }
 
@@ -142,10 +144,10 @@ public class Perfil {
     public List<Incidencia> listarPorIncidencia(){
         ResultSet resultSet = conector.selectFrom(String.format("SELECT  u.*,c.suspendido,c.id_cliente as id, COUNT(id_cliente) as incidencias" +
                 "    FROM prestamo p" +
-                "        INNER JOIN Mi_Biblioteca.renta r on p.id_prestamo = r.id_renta" +
                 "        INNER JOIN Mi_Biblioteca.cliente c on p.cliente_id = c.id_cliente" +
-                "        INNER JOIN Mi_Biblioteca.usuario u on c.id_cliente = u.id" +
-                "    GROUP BY id_cliente"));
+                "        INNER JOIN Mi_Biblioteca.usuario u on c.usuario_id  = u.id "+
+                "   WHERE estado = %s " +
+                "    GROUP BY id_cliente", conector.encomillar(String.valueOf(EstadoPrestamo.FINALIZADO_INCIDENCIA))));
         List<Incidencia> clientesTotal = new ArrayList<>();
         try {
             if (resultSet.next()){
@@ -199,6 +201,13 @@ public class Perfil {
         ResultSet resultSet = conector.selectFrom(query);
         resultSet.next();
         return resultSet.getInt("transportista_id");
+    }
+
+    public int getAdminIDByUsuario(String userID) throws SQLException {
+        String query = String.format("SELECT admin_id FROM admin WHERE usuario_id = %s",userID);
+        ResultSet resultSet = conector.selectFrom(query);
+        resultSet.next();
+        return resultSet.getInt("admin_id");
     }
 
     public int getUsuarioIDbyCliente(String clienteID) throws SQLException {

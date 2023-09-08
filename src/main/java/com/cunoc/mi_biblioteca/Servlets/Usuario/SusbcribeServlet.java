@@ -21,13 +21,13 @@ public class SusbcribeServlet extends HttpServlet {
         String monto = req.getParameter("nuevoSaldo");
         Perfil perfil = new Perfil(conector);
         if (monto != null) {
-            cliente.setSaldo(perfil.sumarSaldo(Double.parseDouble(monto),String.valueOf(cliente.getId())));
+            cliente.setSaldo(perfil.sumarSaldo(Double.parseDouble(monto),String.valueOf(cliente.getCliente_id())));
         } else {
             if (cliente.isSubscrito()){
-                perfil.editarSubscripcion(25,String.valueOf(cliente.getId()),false);
+                perfil.editarSubscripcion(25,String.valueOf(cliente.getCliente_id()),false);
                 cliente.setSubscrito(false);
             } else {
-                perfil.editarSubscripcion(25,String.valueOf(cliente.getId()),true);
+                perfil.editarSubscripcion(25,String.valueOf(cliente.getCliente_id()),true);
                 cliente.setSaldo(cliente.getSaldo()-25);
                 cliente.setSubscrito(true);
             }

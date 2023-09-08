@@ -6,9 +6,8 @@ public enum EstadoPrestamo {
     ACTIVO,
     PENDIENTE,
     VENCIDO,
-    COMPLETADO,
-    MALTRATO,
-    PERDIDA;
+    FINALIZADO,
+    FINALIZADO_INCIDENCIA;
 
     public static EstadoPrestamo clasifica(String nuevo){
         switch (nuevo){
@@ -18,13 +17,12 @@ public enum EstadoPrestamo {
                 return  PENDIENTE;
             case "VENCIDO":
                 return VENCIDO;
-            case "COMPLETADO":
-                return COMPLETADO;
-            case "MALTRATO":
-            case "DAÑO":
-                return MALTRATO;
-            case "PERDIDA":
-                return PERDIDA;
+            case "FINALIZADO":
+            case "FINALIZADA":
+                return FINALIZADO;
+            case "FINALIZADO_INCIDENCIA":
+            case "FINALIZADO CON INCIDENCIA":
+                return FINALIZADO_INCIDENCIA;
             default:
                 return null;
         }

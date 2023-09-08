@@ -48,7 +48,7 @@
                     <h5 class="card-title">Detalles del Usuario: </h5>
                     <ul class="list-group list-group-flush">
                         <li class="list-group-item" id="usName">Usuario: ${userNombre}</li>
-                        <li class="list-group-item" id="librosCt">Libros prestados Actualmente: ${libros}</li>
+                        <li class="list-group-item" id="librosCt">Libros prestados o reservados actualmente: ${libros}</li>
                     </ul>
                 </div>
                 <div class="modal-footer">

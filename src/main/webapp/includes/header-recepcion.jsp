@@ -32,7 +32,7 @@
             <a class="nav-link" href="${pageContext.request.contextPath}/recepcion/add-cliente-servlet">Nuevo Cliente</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="${pageContext.request.contextPath}/recepcion/incidencia-servlet">Incidencias</a>
+            <a class="nav-link" href="${pageContext.request.contextPath}/recepcion/incidencia-servlet">Prestamos</a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="${pageContext.request.contextPath}/recepcion/reportes-servlet">Reportes</a>

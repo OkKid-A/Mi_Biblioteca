@@ -1,6 +1,8 @@
 package com.cunoc.mi_biblioteca.DB;
 
+import com.cunoc.mi_biblioteca.Admin.Predeterminador;
 import com.cunoc.mi_biblioteca.Biblioteca.EstadoPrestamo;
+import com.cunoc.mi_biblioteca.Biblioteca.EstadoRenta;
 import com.cunoc.mi_biblioteca.Biblioteca.PrestamoResumen;
 import com.cunoc.mi_biblioteca.Usuarios.Cliente.Perfil;
 
@@ -12,26 +14,38 @@ public class BibliotecaDB {
 
     private Conector conector;
     private Perfil perfil;
+    private Predeterminador predeterminador;
 
     public BibliotecaDB(Conector conector) {
         this.conector = conector;
         this.perfil = new Perfil(conector);
+        this.predeterminador = new Predeterminador(conector);
     }
 
     public int insertarRenta(int id_renta) throws SQLException {
-        String insertRenta = "INSERT INTO renta (id_renta,fecha_inicio) VALUES (?,curdate())";
+        String insertRenta = "INSERT INTO renta (id_prestamo,fecha_inicio) VALUES (?,curdate())";
         conector.updateWithException(insertRenta,new String[]{String.valueOf(id_renta)});
         String updatePrestamo = "UPDATE prestamo SET estado = ? WHERE id_prestamo = ?";
         conector.update(updatePrestamo,new String[]{String.valueOf(EstadoPrestamo.ACTIVO),String.valueOf(id_renta)});
         return id_renta;
     }
 
-    public void insertarIncidencia(EstadoPrestamo estadoPrestamo, double valorRenta, int id_renta,String id){
-        String insertRenta = ("UPDATE renta SET multa = ? AND tipo_multa = ? WHERE id_renta = ?");
+    public void insertarIncidencia(EstadoRenta estadoPrestamo, double valorRenta, int id_renta, String id){
+        String insertRenta = ("UPDATE renta SET multa = ? AND tipo_multa = ? WHERE id_prestamo = ?");
         conector.update(insertRenta,new String[]{String.valueOf(valorRenta),String.valueOf(estadoPrestamo), String.valueOf(id_renta)});
         String insertPrestamo = "UPDATE prestamo SET estado = ? WHERE id_prestamo = ?";
-        conector.update(insertPrestamo,new String[]{String.valueOf(estadoPrestamo),String.valueOf(id_renta)});
+        conector.update(insertPrestamo,new String[]{String.valueOf(EstadoPrestamo.FINALIZADO_INCIDENCIA),String.valueOf(id_renta)});
+        insertarSuspension(Integer.parseInt(id));
         (new Perfil(conector)).restarSaldo(valorRenta,id);
+    }
+
+    public void insertarSuspension(int cliente_id){
+        String insertarSuspension = "INSERT INTO suspensiones (Id_cliente, fecha_inicio, fecha_final) VALUES (?,?,?)";
+        String fechaActual = predeterminador.obtenerFechaString();
+        String fechaFinal = predeterminador.addDias(predeterminador.obtenerFechaActual(),predeterminador.obtenerDiasSuspension());
+        conector.update(insertarSuspension,new String[]{String.valueOf(cliente_id),fechaActual, fechaFinal});
+        String updateCliente = "UPDATE cliente SET suspendido = 1 WHERE id_cliente = ?";
+        conector.update(updateCliente,new String[]{String.valueOf(cliente_id)});
     }
 
     public PrestamoResumen buscarPrestamo(String idPrestamo){
@@ -105,7 +119,7 @@ public class BibliotecaDB {
             String clienteID = String.valueOf(perfil.getClienteIDByUsuario(id));
             String querySelect = (String.format("SELECT p.*, l.nombre FROM prestamo p" +
                             " INNER JOIN libro l ON p.isbn = l.isbn WHERE cliente_id = %s AND (estado = %s OR estado = %s)"
-                    ,id, conector.encomillar(String.valueOf(EstadoPrestamo.ACTIVO)),conector.encomillar(String.valueOf(EstadoPrestamo.VENCIDO))));
+                    ,clienteID, conector.encomillar(String.valueOf(EstadoPrestamo.ACTIVO)),conector.encomillar(String.valueOf(EstadoPrestamo.VENCIDO))));
             ResultSet resultSet = conector.selectFrom(querySelect);
             if (resultSet.next()){
                 prestamos = listarPrestamos(resultSet);
@@ -189,5 +203,32 @@ public class BibliotecaDB {
             throw new RuntimeException(e);
         }
         return nombre;
+    }
+
+    public void finalizarPrestamo(String id_prestamo) throws SQLException {
+        String getPrestamo = String.format("SELECT p.*, r.fecha_inicio, r,id_renta " +
+                "                        FROM prestamo p " +
+                "                            INNER JOIN renta r ON p.id_prestamo = r.id_prestamo " +
+                "                        WHERE p.id_prestamo = %s", id_prestamo);
+        String estado = "UPDATE prestamo SET estado = ? WHERE id_prestamo = ?";
+        String updateRenta = "UPDATE renta SET multa = ?, tipo_multa = ? WHERE id_renta = ?";
+        ResultSet resultSet = conector.selectFrom(getPrestamo);
+        if (resultSet.next()){
+            Date fecha_crecion  = resultSet.getDate("fecha_inicio");
+            int dias = resultSet.getInt("dias_reservados");
+            String fechaMaxima = predeterminador.addDias(fecha_crecion,dias);
+            boolean vencio = predeterminador.fechaEsPasado(fechaMaxima);
+            if (vencio){
+                conector.update(estado, new String[]{String.valueOf(EstadoPrestamo.FINALIZADO_INCIDENCIA),id_prestamo});
+                conector.update(updateRenta,new String[]{String.valueOf(predeterminador.multaMora()),
+                        String.valueOf(EstadoRenta.MORA),
+                        String.valueOf(resultSet.getInt("id_renta"))
+                });
+                perfil.restarSaldo(predeterminador.multaMora(), String.valueOf(resultSet.getInt("cliente_id")));
+            } else {
+                conector.update(estado, new String[]{String.valueOf(EstadoPrestamo.FINALIZADO),id_prestamo});
+            }
+        }
+        String update = "UPDATE prestamo SET ";
     }
 }

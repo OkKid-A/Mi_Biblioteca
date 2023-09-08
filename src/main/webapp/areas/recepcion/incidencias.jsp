@@ -105,6 +105,7 @@
             <th>ISBN</th>
             <th>Fecha</th>
             <th>Estado</th>
+            <th>Finalizar</th>
         </tr>
         </thead>
         <tbody>
@@ -118,6 +119,10 @@
                     <td>${prestamo.isbn}</td>
                     <td>${prestamo.fecha_creacion}</td>
                     <td>${prestamo.estado}</td>
+                    <td><form id="form-finalizar" action="${pageContext.request.contextPath}/recepcion/incidencia-servlet?prestamo=${prestamo.id}&action=completar" method="post">
+                        <input type="hidden" name="isbn" value="${prestamo.isbn}">
+                        <button class="btn btn-dark" type="submit" form="form-finalizar">Finalizar</button>
+                    </form></td>
                 </tr>
             </c:forEach>
         </c:if>
